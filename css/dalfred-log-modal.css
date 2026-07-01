@@ -1,0 +1,105 @@
+/* Dalfred — activity log detail modal */
+
+#dalfred-log-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+}
+
+.dalfred-log-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.dalfred-log-modal-content {
+    position: relative;
+    max-width: 1000px;
+    width: 92%;
+    max-height: 88vh;
+    margin: 4vh auto;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.dalfred-log-modal-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dalfred-log-modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.dalfred-log-modal-close {
+    font-size: 24px;
+    line-height: 1;
+    color: #666;
+    text-decoration: none;
+    padding: 0 8px;
+}
+
+.dalfred-log-modal-close:hover {
+    color: #000;
+}
+
+.dalfred-log-modal-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+}
+
+.dalfred-log-modal-body section {
+    margin-bottom: 18px;
+}
+
+.dalfred-log-modal-body h4 {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.dalfred-log-modal-body pre {
+    background: #f6f8fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    max-height: 320px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.dalfred-log-modal-body .meta-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 4px 12px;
+    font-size: 13px;
+}
+
+.dalfred-log-modal-body .meta-grid dt {
+    color: #666;
+    font-weight: normal;
+}
+
+.dalfred-log-modal-body .meta-grid dd {
+    margin: 0;
+    word-break: break-all;
+}
+
+.dalfred-log-modal-body .error-class {
+    color: #dc3545;
+    font-weight: bold;
+    font-family: monospace;
+}

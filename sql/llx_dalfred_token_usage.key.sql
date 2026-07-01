@@ -1,0 +1,5 @@
+-- ============================================================================
+-- Dalfred Module - Token usage table keys and constraints
+-- ============================================================================
+-- Keys and indexes are defined inline in the CREATE TABLE statement
+-- in llx_dalfred_token_usage.sql (Dalfred convention).

@@ -1,0 +1,63 @@
+# Composer dependencies
+/vendor/
+composer.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Configuration files with sensitive data
+config.php
+config.local.php
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Node modules (if any)
+node_modules/
+
+# Build artifacts
+/build/
+/dist/
+dolibarr-mcp-server/
+docs/DOLISTORE-COMPLIANCE.md
+docs/DOLISTORE_LISTING.md
+# marketing/ contains the production-ready marketing package
+# (Dolistore descriptions in 5 langs, screenshots, website landing).
+# Tracked since 2026-04-28 to mirror the EMPeppol module convention.
+# Legacy markdown drafts (fiche-dolistore.md, page-edem-website.md, …)
+# stay for reference; canonical sources are the HTML files under
+# marketing/dolistore/ and marketing/website/.
+
+# Local clone of NeuronAI doc (mirror of github.com/neuron-core/neuron-php-doc)
+# Re-clone with: git clone --depth 1 https://github.com/neuron-core/neuron-php-doc dev/neuron-doc
+dev/neuron-doc/
+
+# Test harness run results (per-run JSON, not for commit)
+/tools/test-harness/results/*.json
+
+# Public repository hygiene
+.env
+.env.*
+!.env.example
+vendor/
+composer.lock
+build/
+releases/
+dolibarr-mcp-server/
+*.zip
+*.log
+*.sql.gz
+*.dump

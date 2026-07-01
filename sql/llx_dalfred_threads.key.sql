@@ -1,0 +1,6 @@
+-- ============================================================================
+-- Dalfred Module - Threads table keys and constraints
+-- ============================================================================
+-- Keys and indexes are defined inline in the CREATE TABLE statement.
+-- Foreign key on fk_user not added here to avoid duplicate constraint errors
+-- on module re-activation (MySQL does not support IF NOT EXISTS on ADD CONSTRAINT).

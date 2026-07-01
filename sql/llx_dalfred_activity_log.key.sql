@@ -1,0 +1,4 @@
+-- ============================================================================
+-- Dalfred Module - Activity log table keys
+-- ============================================================================
+-- Keys are defined inline in the CREATE TABLE statement

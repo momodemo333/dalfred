@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dalfred — Assistant IA pour Dolibarr</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #dbeafe;
+    --accent: #f59e0b;
+    --dark: #1e293b;
+    --gray: #64748b;
+    --light: #f8fafc;
+    --border: #e2e8f0;
+    --success: #10b981;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--dark);
+    line-height: 1.6;
+    font-size: 11pt;
+  }
+
+  /* Page breaks */
+  .page-break { page-break-before: always; }
+
+  /* Cover page */
+  .cover {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #3b82f6 100%);
+    color: white;
+    padding: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 80%;
+    height: 150%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%);
+  }
+
+  .cover-icon {
+    font-size: 72px;
+    margin-bottom: 24px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  }
+
+  .cover h1 {
+    font-size: 48pt;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+
+  .cover .subtitle {
+    font-size: 16pt;
+    font-weight: 300;
+    opacity: 0.9;
+    margin-bottom: 40px;
+  }
+
+  .cover .tagline {
+    font-size: 20pt;
+    font-weight: 600;
+    max-width: 600px;
+    line-height: 1.4;
+    margin-bottom: 48px;
+  }
+
+  .cover .version-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 24px;
+    padding: 8px 24px;
+    font-size: 10pt;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .cover-footer {
+    position: absolute;
+    bottom: 40px;
+    font-size: 10pt;
+    opacity: 0.7;
+  }
+
+  /* Content pages */
+  .content {
+    padding: 50px 60px;
+  }
+
+  h2 {
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--primary);
+    display: inline-block;
+  }
+
+  h2.full {
+    display: block;
+  }
+
+  h3 {
+    font-size: 14pt;
+    font-weight: 600;
+    color: var(--dark);
+    margin-top: 28px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin-bottom: 12px;
+    color: #334155;
+  }
+
+  .lead {
+    font-size: 13pt;
+    color: var(--gray);
+    margin-bottom: 32px;
+    line-height: 1.7;
+  }
+
+  /* Hero section */
+  .hero-problem {
+    background: var(--light);
+    border-left: 4px solid var(--accent);
+    padding: 24px 28px;
+    border-radius: 0 12px 12px 0;
+    margin: 24px 0 32px;
+  }
+
+  .hero-problem p {
+    font-size: 12pt;
+    color: var(--dark);
+    margin: 0;
+  }
+
+  .hero-problem strong {
+    color: var(--primary-dark);
+  }
+
+  /* Feature cards */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 24px 0;
+  }
+
+  .feature-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.2s;
+  }
+
+  .feature-card.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .feature-card-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .feature-card h3 {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    font-size: 13pt;
+  }
+
+  .feature-card p {
+    font-size: 10pt;
+    margin-bottom: 0;
+  }
+
+  .feature-card .example {
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-style: italic;
+    color: var(--gray);
+    font-size: 9.5pt;
+    border-left: 3px solid var(--primary);
+  }
+
+  /* Use cases */
+  .use-cases {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .use-case {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .use-case-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .use-case-emoji {
+    font-size: 24px;
+  }
+
+  .use-case-role {
+    font-weight: 600;
+    font-size: 11pt;
+    color: var(--dark);
+  }
+
+  .use-case-quote {
+    font-style: italic;
+    color: var(--gray);
+    font-size: 9.5pt;
+    margin-bottom: 6px;
+  }
+
+  .use-case-result {
+    font-size: 9.5pt;
+    color: var(--primary-dark);
+    font-weight: 500;
+  }
+
+  /* Provider table */
+  .providers-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  .providers-table th {
+    background: var(--primary);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 10pt;
+  }
+
+  .providers-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10pt;
+  }
+
+  .providers-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .providers-table tr:nth-child(even) td {
+    background: var(--light);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 8.5pt;
+    font-weight: 600;
+  }
+
+  .badge-cloud {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+  }
+
+  .badge-local {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  /* Security */
+  .security-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .security-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 14px;
+    background: var(--light);
+    border-radius: 8px;
+  }
+
+  .security-check {
+    color: var(--success);
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .security-item p {
+    margin: 0;
+    font-size: 9.5pt;
+  }
+
+  .security-item strong {
+    display: block;
+    font-size: 10pt;
+    margin-bottom: 2px;
+  }
+
+  /* Pricing */
+  .pricing-box {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+    margin: 24px 0;
+  }
+
+  .pricing-box .price {
+    font-size: 36pt;
+    font-weight: 800;
+  }
+
+  .pricing-box .price-sub {
+    font-size: 12pt;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  .pricing-details {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 24px;
+  }
+
+  .pricing-detail {
+    text-align: center;
+  }
+
+  .pricing-detail .label {
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.7;
+  }
+
+  .pricing-detail .value {
+    font-size: 11pt;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .pricing-note {
+    text-align: center;
+    font-size: 9.5pt;
+    color: var(--gray);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  /* Roadmap / Coming soon */
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .roadmap-card {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    background: white;
+  }
+
+  .roadmap-card-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .roadmap-card h3 {
+    margin-top: 4px;
+    font-size: 12pt;
+    margin-bottom: 6px;
+  }
+
+  .roadmap-card p {
+    font-size: 9.5pt;
+    margin-bottom: 0;
+    color: var(--gray);
+  }
+
+  .roadmap-more {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    background: var(--light);
+    border-radius: 12px;
+    border: none;
+  }
+
+  .roadmap-more p {
+    color: var(--dark);
+    font-size: 10.5pt;
+    margin: 0;
+  }
+
+  /* Compatibility */
+  .compat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .compat-item {
+    text-align: center;
+    padding: 16px 8px;
+    background: var(--light);
+    border-radius: 10px;
+  }
+
+  .compat-item .compat-label {
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gray);
+    margin-bottom: 4px;
+  }
+
+  .compat-item .compat-value {
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  /* Footer */
+  .footer {
+    background: var(--dark);
+    color: white;
+    padding: 36px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-brand h3 {
+    font-size: 14pt;
+    color: white;
+    margin: 0 0 4px;
+  }
+
+  .footer-brand p {
+    color: rgba(255,255,255,0.6);
+    font-size: 9pt;
+    margin: 0;
+  }
+
+  .footer-links {
+    text-align: right;
+    font-size: 9.5pt;
+    line-height: 2;
+  }
+
+  .footer-links a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+  }
+
+  /* Utilities */
+  .mt-sm { margin-top: 12px; }
+  .mt-md { margin-top: 24px; }
+  .text-center { text-align: center; }
+  .text-muted { color: var(--gray); }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="cover">
+  <div class="cover-icon">🤖</div>
+  <h1>Dalfred</h1>
+  <div class="subtitle">Assistant IA pour Dolibarr</div>
+  <div class="tagline">Arrêtez de naviguer dans les menus.<br>Parlez à votre ERP.</div>
+  <div class="version-badge">Version 2.8 — Mars 2026</div>
+  <div class="cover-footer">Développé par E-dem SRL — Belgique 🇧🇪</div>
+</div>
+
+<!-- PAGE 2: LE PROBLÈME + FEATURES -->
+<div class="content page-break">
+  <h2 class="full">Pourquoi Dalfred ?</h2>
+
+  <div class="hero-problem">
+    <p>
+      Dolibarr est un ERP puissant, mais sa richesse fonctionnelle a un coût : des dizaines de menus, des centaines d'écrans, des filtres à configurer. Vos équipes passent souvent plus de temps à <strong>chercher l'information</strong> qu'à <strong>l'exploiter</strong>.
+    </p>
+    <p class="mt-sm" style="font-weight: 600; color: var(--primary-dark);">
+      Et si votre ERP comprenait simplement ce que vous lui demandez ?
+    </p>
+  </div>
+
+  <p>Dalfred est un véritable <strong>assistant métier</strong> intégré à Dolibarr. Il comprend votre base de données, connaît vos clients, vos factures, vos produits — et agit pour vous. En langage naturel.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-card-icon">💬</div>
+      <h3>Interrogez vos données</h3>
+      <p>Posez vos questions en français, en anglais ou dans votre langue. Dalfred interroge Dolibarr en temps réel et répond en texte, tableau ou graphique.</p>
+      <div class="example">« Quel est le chiffre d'affaires du mois dernier ? »</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📄</div>
+      <h3>Créez vos documents</h3>
+      <p>Factures, devis, commandes, fiches tiers, produits — créez-les en une phrase. Plus besoin de naviguer d'écran en écran.</p>
+      <div class="example">« Crée une facture pour Martin, 5h de consulting à 120€ »</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">📊</div>
+      <h3>Rapports instantanés</h3>
+      <p>Obtenez vos KPI en quelques secondes. Exportez les résultats en CSV d'un clic.</p>
+      <div class="example">« Top 10 clients par CA cette année »</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">🔖</div>
+      <h3>Smart Queries</h3>
+      <p>Sauvegardez vos analyses favorites et réexécutez-les en un clic, avec des paramètres dynamiques. Partagez-les avec l'équipe.</p>
+      <div class="example">« Exécute la requête "impayés 30 jours" pour ce mois »</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">🧠</div>
+      <h3>Mémoire persistante</h3>
+      <p>Dalfred retient ce que vous lui confiez : procédures, préférences, notes clients. Mémoire privée ou partagée avec l'équipe.</p>
+      <div class="example">« Retiens que notre marge cible est de 35% sur le consulting »</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card-icon">⚡</div>
+      <h3>Mode asynchrone</h3>
+      <p>Continuez à travailler dans Dolibarr pendant que Dalfred réfléchit. Aucun blocage, même sur les requêtes complexes.</p>
+      <div class="example">Widget flottant sur toutes les pages + mode plein écran</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: CAS D'USAGE + SÉCURITÉ -->
+<div class="content page-break">
+  <h2 class="full">Dalfred au quotidien</h2>
+  <p class="lead">Chaque profil dans votre entreprise y trouve son compte.</p>
+
+  <div class="use-cases">
+    <div class="use-case">
+      <div class="use-case-header">
+        <span class="use-case-emoji">👤</span>
+        <span class="use-case-role">Le dirigeant</span>
+      </div>
+      <div class="use-case-quote">« Quel est mon CA ce trimestre comparé à l'an dernier ? »</div>
+      <div class="use-case-result">→ KPI en 5 secondes, sans naviguer dans 3 menus</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-header">
+        <span class="use-case-emoji">📋</span>
+        <span class="use-case-role">La comptable</span>
+      </div>
+      <div class="use-case-quote">« Crée une facture d'acompte de 30% pour le devis PR2024-0045 »</div>
+      <div class="use-case-result">→ Dalfred retrouve le devis, calcule et crée la facture</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-header">
+        <span class="use-case-emoji">📦</span>
+        <span class="use-case-role">Le commercial</span>
+      </div>
+      <div class="use-case-quote">« Quels clients n'ont pas commandé depuis 6 mois ? »</div>
+      <div class="use-case-result">→ Analyse instantanée pour relancer les clients dormants</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-header">
+        <span class="use-case-emoji">🔧</span>
+        <span class="use-case-role">Le technicien</span>
+      </div>
+      <div class="use-case-quote">« Quel est le stock de la pièce REF-4521 ? »</div>
+      <div class="use-case-result">→ Réponse immédiate sans quitter l'écran en cours</div>
+    </div>
+  </div>
+
+  <h2 class="full mt-md">Sécurité & Confidentialité</h2>
+  <p>Vos données restent sous votre contrôle. Toujours.</p>
+
+  <div class="security-grid">
+    <div class="security-item">
+      <span class="security-check">✓</span>
+      <div>
+        <strong>Connexion directe</strong>
+        <p>Communication entre votre serveur et le provider IA. Aucune donnée ne transite par nos serveurs.</p>
+      </div>
+    </div>
+    <div class="security-item">
+      <span class="security-check">✓</span>
+      <div>
+        <strong>Permissions respectées</strong>
+        <p>L'assistant n'accède qu'aux données autorisées pour l'utilisateur connecté.</p>
+      </div>
+    </div>
+    <div class="security-item">
+      <span class="security-check">✓</span>
+      <div>
+        <strong>Contrôle granulaire</strong>
+        <p>Droits par utilisateur : chat, requêtes SQL, lecture seule ou lecture/écriture.</p>
+      </div>
+    </div>
+    <div class="security-item">
+      <span class="security-check">✓</span>
+      <div>
+        <strong>Traçabilité complète</strong>
+        <p>Toutes les interactions journalisées : utilisateur, date, durée, actions.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4: PROVIDERS + COMPAT + PRICING + ROADMAP -->
+<div class="content page-break">
+  <h2 class="full">Choisissez votre provider IA</h2>
+  <p>Dalfred est compatible avec les principaux fournisseurs d'IA. Vous gardez le contrôle.</p>
+
+  <table class="providers-table">
+    <thead>
+      <tr>
+        <th>Provider</th>
+        <th>Modèles</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Anthropic</strong></td>
+        <td>Claude Opus, Sonnet, Haiku</td>
+        <td><span class="badge badge-cloud">Cloud</span></td>
+      </tr>
+      <tr>
+        <td><strong>OpenAI</strong></td>
+        <td>GPT-4.1, GPT-4.1 Mini, o4-mini</td>
+        <td><span class="badge badge-cloud">Cloud</span></td>
+      </tr>
+      <tr>
+        <td><strong>Google</strong></td>
+        <td>Gemini 2.5 Pro, Gemini 2.5 Flash</td>
+        <td><span class="badge badge-cloud">Cloud</span></td>
+      </tr>
+      <tr>
+        <td><strong>Mistral AI</strong></td>
+        <td>Mistral Large, Medium, Codestral</td>
+        <td><span class="badge badge-cloud">Cloud (EU)</span></td>
+      </tr>
+      <tr>
+        <td><strong>Ollama</strong></td>
+        <td>Tout modèle compatible</td>
+        <td><span class="badge badge-local">Auto-hébergé</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="text-muted" style="font-size: 9.5pt;">Chaque utilisateur configure sa propre clé API, pour un contrôle total des coûts et de la confidentialité. Avec Ollama, vos données ne quittent jamais votre infrastructure.</p>
+
+  <h2 class="full mt-md">Compatibilité</h2>
+  <div class="compat-grid">
+    <div class="compat-item">
+      <div class="compat-label">Dolibarr</div>
+      <div class="compat-value">18.0+</div>
+    </div>
+    <div class="compat-item">
+      <div class="compat-label">PHP</div>
+      <div class="compat-value">8.1+</div>
+    </div>
+    <div class="compat-item">
+      <div class="compat-label">Base de données</div>
+      <div class="compat-value">MySQL / MariaDB</div>
+    </div>
+    <div class="compat-item">
+      <div class="compat-label">Hébergement</div>
+      <div class="compat-value">Tout serveur</div>
+    </div>
+  </div>
+  <p class="text-muted" style="font-size: 9.5pt;">Installation rapide : activez le module, configurez votre clé API, et le widget apparaît sur toutes les pages Dolibarr.</p>
+
+  <div class="pricing-box">
+    <div class="price">400 € <span style="font-size: 14pt; font-weight: 400;">HT</span></div>
+    <div class="price-sub">Achat unique — pas d'abonnement</div>
+    <div class="pricing-details">
+      <div class="pricing-detail">
+        <div class="label">Mises à jour</div>
+        <div class="value">1 an inclus</div>
+      </div>
+      <div class="pricing-detail">
+        <div class="label">Support</div>
+        <div class="value">Email inclus</div>
+      </div>
+      <div class="pricing-detail">
+        <div class="label">Coût IA</div>
+        <div class="value">~5€/mois*</div>
+      </div>
+    </div>
+  </div>
+  <p class="pricing-note">* Coût indicatif pour un usage courant. L'IA est facturée par votre provider via votre propre clé API.</p>
+</div>
+
+<!-- PAGE 5: ROADMAP + CONTACT -->
+<div class="content page-break">
+  <h2 class="full">Fonctionnalités à venir</h2>
+  <p class="lead">Dalfred évolue en permanence. Voici ce qui arrive dans les prochaines versions.</p>
+
+  <div class="roadmap-grid">
+    <div class="roadmap-card">
+      <div class="roadmap-card-icon">🎙️</div>
+      <h3>Commande vocale</h3>
+      <p>Parlez à Dalfred depuis votre navigateur. Dictez vos instructions au lieu de les taper — idéal en mobilité ou pour les équipes terrain.</p>
+    </div>
+    <div class="roadmap-card">
+      <div class="roadmap-card-icon">📎</div>
+      <h3>Analyse de documents</h3>
+      <p>Envoyez un PDF, une image ou un scan à Dalfred. Il en extrait les données et peut créer les documents correspondants dans Dolibarr.</p>
+    </div>
+    <div class="roadmap-card">
+      <div class="roadmap-card-icon">⏰</div>
+      <h3>Tâches planifiées</h3>
+      <p>Programmez des actions automatiques : rapports hebdomadaires, alertes sur les factures en retard, relances — Dalfred travaille même quand vous n'êtes pas là.</p>
+    </div>
+    <div class="roadmap-card">
+      <div class="roadmap-card-icon">⚡</div>
+      <h3>Actions déclenchées</h3>
+      <p>Associez des actions IA aux événements Dolibarr : validation de facture, création de commande, changement de statut… Dalfred réagit automatiquement.</p>
+    </div>
+    <div class="roadmap-more">
+      <p>🚀 <strong>Et bien plus encore</strong> — L'IA ouvre un champ immense de possibilités. Chaque retour utilisateur alimente notre feuille de route.</p>
+    </div>
+  </div>
+
+  <div style="height: 40px;"></div>
+
+  <div class="footer" style="border-radius: 16px; margin: 0;">
+    <div class="footer-brand">
+      <h3>E-dem SRL</h3>
+      <p>Développement de modules Dolibarr & intégration ERP</p>
+      <p style="margin-top: 8px;">Belgique 🇧🇪</p>
+    </div>
+    <div class="footer-links">
+      <div>🌐 <a href="https://www.e-dem.com">www.e-dem.com</a></div>
+      <div>📧 <a href="mailto:morgan@e-dem.com">morgan@e-dem.com</a></div>
+      <div>📞 +32 474 62 22 18</div>
+      <div style="margin-top: 8px;">🏪 <a href="https://www.dolistore.com/product.php?id=2743">Dalfred sur DoliStore</a></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

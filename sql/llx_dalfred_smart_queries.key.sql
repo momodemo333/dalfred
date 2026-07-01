@@ -1,0 +1,2 @@
+-- Dalfred Smart Queries - Keys
+-- No additional keys needed (defined in main SQL file)

@@ -1,0 +1,502 @@
+# Dalfred - Bulgarian language file
+# Copyright (C) 2024 E-dem
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Module
+Module491408Name = Dalfred
+Module491408Desc = Интелигентен ИИ асистент за Dolibarr с MCP интеграция
+
+# Menu
+Dalfred = Dalfred
+Chat = Чат
+Conversations = Разговори
+
+# Setup pages
+DalfredSetup = Настройка на Dalfred
+GeneralSetup = Общи настройки
+AIConfiguration = Конфигурация на ИИ
+ToolkitPermissions = Разрешения
+Diagnostic = Диагностика
+About = Относно
+
+# General configuration
+GeneralConfiguration = Обща конфигурация
+MCPServerConfiguration = Конфигурация на MCP сървър
+MCPEnabled = Активиране на MCP сървър
+MCPEnabledDesc = Активира интеграцията с MCP сървъра на Dolibarr за изпълнение на действия
+
+ChatConfiguration = Конфигурация на чата
+ContextWindow = Контекстен прозорец
+ContextWindowDesc = Максимален размер на контекста на разговора в токени
+MaxThreadsPerUser = Максимум разговори на потребител
+MaxThreadsPerUserDesc = Максимален брой активни разговори на потребител
+RequireUserApiKey = Изискване на потребителски API ключ
+RequireUserApiKeyDesc = Всеки потребител трябва да има собствен API ключ за Dolibarr
+
+RateLimitingConfiguration = Ограничение на заявките
+RateLimitRequests = Лимит на заявките
+RateLimitRequestsDesc = Максимален брой заявки на час на потребител
+RateLimitTokens = Лимит на токените
+RateLimitTokensDesc = Максимален брой токени на час на потребител
+PerHour = на час
+
+DebugConfiguration = Конфигурация за отстраняване на грешки
+DebugMode = Режим за отстраняване на грешки
+DebugModeDesc = Активиране на подробни логове за отстраняване на грешки
+LogConversations = Записване на разговори
+LogConversationsDesc = Записване на разговори за анализ
+
+# AI configuration
+AIProviderSettings = Настройки на ИИ доставчик
+AIProvider = ИИ доставчик
+AIProviderDesc = Изберете доставчика на ИИ услуга
+AIModel = ИИ модел
+AIModelDesc = Модел за използване в разговорите
+AnthropicAPIKey = API ключ за Anthropic
+AnthropicAPIKeyDesc = Вашият API ключ за Anthropic (от console.anthropic.com)
+OpenAIAPIKey = API ключ за OpenAI
+OpenAIAPIKeyDesc = Вашият API ключ за OpenAI (от platform.openai.com)
+MistralAPIKey = API ключ за Mistral
+MistralAPIKeyDesc = Вашият API ключ за Mistral (от console.mistral.ai)
+GeminiAPIKey = API ключ за Google Gemini
+GeminiAPIKeyDesc = Вашият API ключ за Google Gemini (от aistudio.google.com)
+ProviderAPIKey = API ключ
+OllamaURL = URL на Ollama сървър
+OllamaURLDesc = URL на вашия локален Ollama сървър (напр. http://localhost:11434/api)
+OllamaURLRequired = URL на Ollama сървъра е задължителен
+OllamaModelPlaceholder = Име на модела (напр. llama3, mistral, codellama...)
+CustomModelPlaceholder = Въведете име на модел (напр. claude-sonnet-4-5-20250514)...
+OtherCustomModel = Друг (персонализиран модел)
+APIKeyAlreadyConfigured = ✓ API ключът вече е конфигуриран (оставете празно, за да запазите текущия)
+MaxTokens = Максимум токени
+MaxTokensDesc = Максимален брой токени за всеки отговор
+
+TestConnection = Тест на връзката
+TestConnectionDesc = Проверете дали връзката с API работи правилно
+AIConnectionSuccess = Връзката с API е успешна!
+AIConnectionFailed = Неуспешна връзка с API
+APIKeyRequired = API ключът е задължителен
+APIKeyNotConfigured = API ключът не е конфигуриран
+
+ImportantNote = Важна забележка
+APIKeyStoredSecurely = API ключът се съхранява сигурно в базата данни
+GetAPIKeyFrom = Получете вашия API ключ от
+CostsApply = Прилагат се такси за използване според вашата консумация
+
+# Toolkit permissions
+MySQLToolkitGlobalSettings = Глобално активиране на MySQL Toolkit
+MySQLToolkitEnable = Активиране на MySQL Toolkit (достъп за четене на базата данни)
+MySQLToolkitWriteEnable = Активиране на запис в MySQL (позволява на ИИ да променя данни)
+MySQLToolkitGloballyDisabled = MySQL Toolkit е глобално деактивиран. Активирайте го по-горе, за да влязат в сила потребителските права.
+MySQLToolkitWarning = MySQL Toolkit позволява на ИИ да изпълнява SQL заявки директно върху вашата база данни. Това може да представлява рискове за сигурността. Активирайте тази функция само за доверени потребители.
+MySQLReadAccess = MySQL достъп (четене)
+MySQLWriteAccess = MySQL достъп (запис)
+MySQLReadAccessDesc = Позволява на потребителя да използва MySQL toolkit за четене на данни
+MySQLWriteAccessDesc = Позволява на потребителя да променя данни чрез MySQL (ОПАСНО)
+ToolkitPermissionsInfo = Информация за правата
+MySQLToolkitRecommendation = Препоръка: Активирайте достъпа за запис само за администратори и само ако е абсолютно необходимо.
+ReadOnly = Само за четене
+ReadWrite = Четене/Запис
+Disabled = Деактивирано
+PermissionsUpdated = Правата са актуализирани
+
+# About page
+ModuleInformation = Информация за модула
+ModuleName = Име на модула
+Version = Версия
+Author = Автор
+License = Лиценз
+Description = Описание
+DalfredDescription = Dalfred е интелигентен ИИ асистент, който помага на потребителите да взаимодействат със системата Dolibarr на естествен език. Той използва Claude AI и протокола MCP за изпълнение на действия.
+Features = Функционалности
+FeatureNaturalLanguage = Взаимодействие с Dolibarr на естествен език
+FeatureMCP = MCP интеграция за изпълнение на действия (създаване, промяна, изтриване)
+FeatureToolkits = Вградени инструменти (Калкулатор, Календар, MySQL)
+FeatureConversationHistory = Постоянна история на разговорите
+FeaturePermissions = Детайлна система за права
+TechnicalInformation = Техническа информация
+PHPVersion = PHP версия
+DolibarrVersion = Dolibarr версия
+MCPServer = MCP сървър
+Support = Поддръжка
+SupportInfo = За помощ или за да докладвате проблем, консултирайте документацията на модула или се свържете с поддръжката.
+
+# Permissions
+Permission49140801 = Използване на асистента Dalfred
+Permission49140802 = Управление на собствените разговори
+Permission49140803 = Преглед на всички разговори
+Permission49140804 = Конфигуриране на модула Dalfred
+
+# Chat interface
+NewConversation = Нов разговор
+TypeYourMessage = Въведете вашето съобщение
+WelcomeMessage = Здравейте %s!
+ConfirmClearConversation = Сигурни ли сте, че искате да изчистите този разговор и да започнете нов?
+
+# Chat interface - Welcome & Suggestions
+WelcomeIntro = Аз съм %s, вашият ИИ асистент за Dolibarr. Мога да ви помогна да навигирате, търсите и управлявате вашите данни.
+SuggestionUnpaidInvoices = Покажи неплатените ми фактури
+SuggestionMonthlyRevenue = Какъв е приходът ми този месец?
+SuggestionRecentClients = Покажи последните ми клиенти
+SuggestionCreateInvoice = Помогни ми да създам фактура
+SuggestionLabelUnpaidInvoices = Неплатени фактури
+SuggestionLabelMonthlyRevenue = Приход за месеца
+SuggestionLabelRecentClients = Последни клиенти
+SuggestionLabelCreateInvoice = Нова фактура
+
+# Chat interface - Widget
+WidgetTitle = %s - ИИ Асистент
+WidgetOnline = На линия
+WidgetMemory = Памет
+WidgetFullscreen = Отвори на цял екран
+WidgetNewConversation = Нов разговор
+WidgetClose = Затвори
+WidgetPlaceholder = Задайте вашия въпрос...
+WidgetSend = Изпрати
+WidgetWelcomeTitle = Здравейте! Аз съм %s, вашият Dolibarr асистент
+WidgetWelcomeIntro = Мога да ви помогна с:
+WidgetHelpSearch = Търсене на клиенти, фактури, поръчки
+WidgetHelpAnalyze = Анализ на вашите данни и статистики
+WidgetHelpCreate = Създаване на нови елементи
+WidgetHelpQuestions = Отговори на въпроси за Dolibarr
+WidgetTryExample = Опитайте: "Моите неплатени фактури" или "Приход за месеца"
+WidgetClearConfirm = Изчистване на разговора и започване на нов?
+WidgetFullscreenLabel = цял екран
+WidgetWidgetLabel = уиджет
+
+# Chat interface - Error messages
+ErrorServer = Грешка на сървъра (%s)
+ErrorInvalidResponse = Невалиден отговор от сървъра
+ErrorGeneric = Възникна грешка. Моля, опитайте отново.
+ErrorNetwork = Проблем с мрежовата връзка.
+
+# Threads/Conversations list
+AllConversations = Всички разговори
+ActiveConversations = Активни разговори
+ArchivedConversations = Архивирани разговори
+NoConversationsYet = Все още нямате разговори. Започнете нов!
+StartNewConversation = Започнете разговор
+UntitledConversation = Разговор без заглавие
+BackToChat = Обратно към чата
+ThreadDeleted = Разговорът е изтрит
+ThreadArchived = Разговорът е архивиран
+ThreadReopened = Разговорът е възобновен
+ErrorDeletingThread = Грешка при изтриване на разговора
+ConfirmDeleteThread = Сигурни ли сте, че искате да изтриете този разговор? Това действие е необратимо.
+Open = Отвори
+Archive = Архивирай
+Reopen = Възобнови
+Delete = Изтрий
+Active = Активен
+Archived = Архивиран
+LastMessage = Последно съобщение
+Created = Създаден
+Title = Заглавие
+Status = Статус
+Actions = Действия
+
+# Activity Log
+ActivityLog = Логове на активността
+DalfredActivityLog = Логове на активността на Dalfred
+ActivityLogDesc = Общо %s записани събития
+NoActivityLogs = Няма логове на активността
+EventType = Тип събитие
+ToolName = Инструмент
+ThreadID = Тема
+Duration = Продължителност
+Details = Детайли
+PurgeOldLogs = Изчистване на логове по-стари от %s дни
+PurgeAllLogs = Изчистване на всички логове
+ConfirmPurgeAll = Сигурни ли сте, че искате да изтриете ВСИЧКИ логове на активността?
+LogsPurged = %s лога изтрити
+Search = Търсене
+Reset = Нулиране
+All = Всички
+
+# System Prompt
+SystemPromptConfiguration = Персонализиран системен промпт
+SystemPromptDesc = Персонализирайте системния промпт на асистента. Оставете празно, за да използвате промпта по подразбиране. Контекстът на потребителя (име, роля) и контекстът на страницата винаги се добавят автоматично.
+SystemPromptPlaceholder = Оставете празно, за да използвате промпта по подразбиране...
+
+# Common
+Save = Запази
+SetupSaved = Конфигурацията е запазена
+Error = Грешка
+Warning = Внимание
+Value = Стойност
+Action = Действие
+NoUsers = Няма намерени потребители
+User = Потребител
+
+# Knowledge / Memory
+KnowledgeMemory = Памет
+KnowledgeManagement = Управление на паметта
+KnowledgeEntries = Записи в паметта
+KnowledgeEntry = Запис в паметта
+KnowledgeTitle = Заглавие
+KnowledgeContent = Съдържание
+KnowledgeCategory = Категория
+KnowledgeScope = Обхват
+KnowledgeScopePrivate = Частен
+KnowledgeScopeShared = Споделен
+KnowledgeDate = Дата на създаване
+KnowledgeAdd = Добавяне на запис
+KnowledgeEdit = Редактиране на запис
+KnowledgeDelete = Изтриване на запис
+KnowledgeDeleteConfirm = Сигурни ли сте, че искате да изтриете този запис от паметта?
+KnowledgeDeleteAllConfirm = Сигурни ли сте, че искате да изтриете ВСИЧКИ записи от паметта?
+KnowledgeSaved = Записът е запазен
+KnowledgeUpdated = Записът е актуализиран
+KnowledgeDeleted = Записът е изтрит
+KnowledgeDeleteAll = Изтрий всичко
+KnowledgeNoEntries = Няма записи в паметта
+KnowledgeSearchPlaceholder = Търсене в паметта...
+KnowledgeAllCategories = Всички категории
+KnowledgeAllScopes = Всички обхвати
+KnowledgeAllUsers = Всички потребители
+KnowledgeAdminDesc = Общо %s записа в паметта (всички потребители)
+KnowledgeUserDesc = Вашата памет: частни записи и споделени записи
+BackToChat = Обратно към чата
+AddNewEntry = Добавяне на запис
+Owner = Собственик
+
+# Permissions & User Management
+UserManagement = Управление на потребителите
+UserManagementDesc = Преглед на правата и достъпа на потребителите до Dalfred
+DalfredAccess = Достъп до Dalfred
+ApiKey = API ключ
+ApiKeyConfigured = Конфигуриран
+ApiKeyMissing = Липсва
+ApiKeyGenerated = API ключ генериран за потребител %s
+GenerateApiKey = Генериране
+GenerateApiKeyConfirm = Генериране на API ключ за този потребител?
+UserNoDalfredRight = Този потребител няма право да използва Dalfred
+UserReady = Готов
+UserNotReady = Не е конфигуриран
+UserReadyDesc = Потребителят има право на Dalfred и конфигуриран API ключ
+PermissionsHowTo = За да дадете достъп до Dalfred на потребител, отидете в картата на потребителя (Начало > Потребители и Групи), раздел "Права", и активирайте правото "%s".
+
+# === Translations added in v2.21.2 — port of FR/EN keys to BG ===
+
+# Common
+Maintenance = Поддръжка
+ResultsPerPage = Резултати на страница
+Never = Никога
+Seconds = секунди
+View = Преглед
+DownloadFile = Изтегляне
+DeleteFile = Изтриване
+FileSize = Размер
+FileCreatedAt = Създаден на
+FileDeleted = Файлът е изтрит
+ErrorDeletingFile = Грешка при изтриването
+ErrorInvalidFilename = Невалидно име на файл
+ErrorSavingConfig = Грешка при запазването на конфигурацията
+ConfirmDeleteFile = Потвърждавате ли изтриването на %s?
+
+# Activity log debug (v2.21.0)
+LogDetailTitle = Детайли на събитието
+
+# Attachments
+AttachmentButton = Прикачи файл
+AttachmentDropZone = Пуснете файловете тук
+AttachmentBadType = %s: неподдържан тип
+AttachmentTooLarge = %s: твърде голям (макс. %s)
+AttachmentTooMany = Максимум %d файла на съобщение
+AttachmentExpired = Файлът е изтекъл
+AttachmentsEnabled = Активиране на прикачените файлове
+AttachmentsEnabledDesc = Позволява на потребителите да прикачват текстови файлове и изображения към разговорите.
+
+# Branding / Personalization
+DalfredBrandingTab = Персонализация
+DalfredBrandingTitle = Визуална персонализация
+DalfredBrandingDesc = Персонализирайте името, логото и цветовете на агента според вашата визуална идентичност. Празните полета се връщат към стойностите по подразбиране на Dalfred.
+DalfredBrandName = Име на агента
+DalfredBrandNameDesc = Име, показвано вместо "Dalfred" в целия интерфейс (макс. 50 символа).
+DalfredBrandLogo = Лого
+DalfredBrandLogoDesc = PNG, SVG или JPG, максимум 2 MB. Заменя иконата по подразбиране.
+DalfredBrandLogoCurrent = Текущо лого
+DalfredBrandLogoRemove = Премахване на логото
+DalfredBrandLogoTooLarge = Логото надвишава 2 MB.
+DalfredBrandLogoBadFormat = Неприет формат на лого (само PNG, SVG или JPG).
+DalfredBrandLogoBadContent = Невалидно съдържание на логото.
+DalfredBrandColorPrimary = Основен цвят
+DalfredBrandColorSecondary = Вторичен цвят
+DalfredBrandPreview = Преглед
+DalfredBrandReset = Възстановяване по подразбиране
+DalfredBrandSaved = Персонализацията е запазена.
+
+# Diagnostic page
+DiagPageIntro = Проверява уеб стека между браузъра и PHP и препоръчва подходящите настройки за timeout, за да се избегнат грешки 504 при дълги отговори на AI.
+DiagSectionStack = Открит стек
+DiagSectionRecos = Препоръки за дълги timeouts (%d s — вижте бележката по-долу)
+DiagSectionTest = Тест на дълга заявка
+DiagSectionReport = Отчет (за поставяне в писмо до поддръжката)
+DiagRowWebserver = Уеб сървър
+DiagRowPhp = PHP
+DiagRowReverseProxy = Reverse proxy отпред
+DiagRowCdn = CDN
+DiagRowPanel = Контролен панел на хостинга
+DiagBadgeYes = Да
+DiagBadgeUnknown = Неизвестно
+DiagBadgeUndetected = Не е открито
+DiagBadgeFinishOk = fastcgi_finish_request OK
+DiagBadgeFinishKo = fastcgi_finish_request недостъпен
+DiagCdnNoneHint = Не е открит CDN в HTTP headers
+DiagPanelNoneHint = Не е открит панел (Plesk, cPanel, DirectAdmin)
+DiagProxyNoneHint = PHP изглежда говори директно с frontend сървъра
+DiagProxyRealIp = Реален IP на клиента
+DiagPhpMaxExec = max_execution_time
+DiagRecosNone = Няма конкретни препоръки: стекът не е идентифициран.
+DiagRecosNote = Стойностите по-долу са <strong>препоръчителните минимуми</strong>, за да поемете комфортно дълги отговори на AI (бавни модели, верижни tools, големи prompt). <strong>180 s</strong> е достатъчно за повечето случаи, <strong>600 s</strong> е щедър максимум, който все пак прекъсва наистина зацикляли заявки. Адаптирайте според използването си.
+DiagTestIntro = Изпраща AJAX заявка, която принуждава сървъра да чака N секунди. Ако успее, стекът поддържа тази продължителност. Ако timeout, браузърът ще покаже точната грешка (504 или друга) и изминалото време ще разкрие кой компонент е прекъснал.
+DiagTestDuration = Продължителност на sleep:
+DiagTestSecondsFmt = %d секунди
+DiagTestMax = %d секунди (макс.)
+DiagTestSanityCheck = %d секунди (sanity check)
+DiagTestRun = ▶ Стартиране на теста
+DiagTestRunning = ⏳ Заявка в ход… (макс. %ds)
+DiagTestOk = ✅ Тест OK
+DiagTestKo = ❌ Неуспех
+DiagTestResultOk = ✅ Отговор получен след %s s
+DiagTestResultKo = ❌ Заявката се провали след %s s
+DiagTestServerSide = От страна на сървъра: sleep %ds, измерено %ss
+DiagTestStatusHttp = HTTP статус
+DiagTestHints = Запишете внимателно изминалото време: то показва кой компонент е прекъснал. Подсказки: ~30 s = max_execution_time на PHP — ~60 s = nginx/Apache по подразбиране — ~100 s = Cloudflare безплатен/Pro — ~120 s = nginx fastcgi_read_timeout по подразбиране.
+DiagReportCopy = 📋 Копиране в clipboard
+DiagReportCopied = ✅ Копирано
+DiagReportCopyFail = ❌ Невъзможно копиране — изберете текста ръчно.
+
+# File generation toolkit
+FileGenerationToolkit = Генериране на файлове
+FileGenerationDescription = Агентът може да създава TXT/CSV/HTML/MD/JSON файлове в личната директория на всеки потребител. Файловете могат да се изтеглят от "Моите файлове".
+FileGenerationDisabledByAdmin = Генерирането на файлове е деактивирано от администратора
+FileGenerationGloballyDisabled = Генерирането на файлове е глобално деактивирано
+FileGenerationMaxSize = Максимален размер на файл (MB)
+EnableFileGeneration = Позволяване на агента да създава файлове
+MyFiles = Моите файлове
+MyGeneratedFiles = Моите генерирани файлове
+NoFilesGenerated = Все още няма генерирани файлове
+
+# Knowledge / slash commands
+KnowledgeColCommand = Команда
+KnowledgeCommandName = Име на команда
+KnowledgeCommandNameHelp = По избор. Когато е попълнено, този запис става slash команда, извиквана с /<име>. Формат: малки букви, цифри и тирета (макс. 64 символа).
+KnowledgeCommandPlaceholder = напр. фактури-този-месец
+KnowledgeCommandInvalidName = Невалидно име на команда. Използвайте само малки букви, цифри и тирета (макс. 64 символа).
+KnowledgeCommandNameTaken = Това име на команда вече се използва.
+KnowledgeFilterAll = Покажи всички
+KnowledgeFilterCommands = Само команди
+KnowledgeFilterKnowledge = Само знания
+KnowledgeTestCommand = Тестване на командата
+
+# System prompt preview
+ShowFullPromptPreview = Преглед на пълния prompt
+HideFullPromptPreview = Скрий пълния prompt
+FullPromptPreviewInfo = Това е преглед на пълния prompt, така както ще бъде изпратен към AI. Динамичните секции (потребител, страница, памет) са обозначени с placeholders [...]. Съдържанието между "Специфични инструкции" и "Текущ потребител" съответства на вашите персонализирани инструкции по-горе.
+
+# MySQL schema introspection
+MySQLSchemaEnable = Активиране на MySQL schema introspection
+MySQLSchemaEnableDesc = Позволява на агента да изследва структурата на вашата база данни (таблици, колони, връзки), за да отговаря на въпроси относно схемата. Само за четене, никога не променя данни.
+
+# Ollama
+OllamaNumCtx = Контекстен прозорец (num_ctx)
+OllamaNumCtxDesc = Брой токени, които моделът Ollama може да обработи в една заявка (вход + изход общо). Стойността по подразбиране на Ollama (2048-4096) е твърде малка за каталога с tools на Dalfred и води до отрязани prompts. 16384 се побира в 8-12 GB VRAM за 7B модел и е безопасна стойност по подразбиране. Задайте 0, за да деактивирате и да използвате вградената стойност на Ollama (не се препоръчва).
+OllamaTimeout = HTTP timeout
+OllamaTimeoutDesc = Максимално време (в секунди) за изчакване на отговор от Ollama. Стойността по подразбиране (300 s) покрива повечето self-hosted конфигурации. Увеличете я, ако използвате голям модел на CPU и виждате cURL timeout грешки. Библиотеката NeuronAI по подразбиране е 60 s, което често е твърде малко.
+
+# Permission label
+Permission49140805 = Използване на Smart Queries (записани SQL заявки)
+
+# Smart Queries
+SmartQueries = Smart Queries
+SmartQueryEnable = Активиране на Smart Queries (записани SQL заявки)
+SmartQueryDesc = Вашите записани SQL заявки. Създайте ги чрез Dalfred chat или ги изпълнете директно тук.
+SmartQueryEntries = Записани заявки
+SmartQueryNoEntries = Няма записани заявки. Използвайте Dalfred chat, за да създадете първите си заявки.
+SmartQueryNew = Нова заявка
+SmartQueryCreate = Създаване на заявка
+SmartQueryCreated = Заявката е създадена успешно
+SmartQueryUpdated = Заявката е обновена успешно
+SmartQuerySaved = Заявката е запазена успешно
+SmartQueryDeleted = Заявката е изтрита
+SmartQueryDuplicated = Заявката е дублирана успешно
+SmartQueryDuplicate = Дублиране
+SmartQueryEdit = Редактиране
+SmartQuerySave = Запазване
+SmartQueryView = Преглед
+SmartQueryExecute = Изпълнение
+SmartQueryDeleteConfirm = Сигурни ли сте, че искате да изтриете тази заявка?
+SmartQueryConfirmDelete = Сигурни ли сте, че искате да изтриете тази заявка?
+SmartQueryCard = Детайли на заявката
+SmartQueryBackToCard = Обратно към фишата
+SmartQueryBackToList = Обратно към списъка
+SmartQueryTitle = Заглавие
+SmartQueryDescription = Описание
+SmartQueryCategory = Категория
+SmartQueryCategoryList = клиенти,фактури,поръчки,продукти,доставчици,счетоводство,hr,склад,други
+SmartQueryNoCategory = Без категория
+SmartQueryScope = Обхват
+SmartQueryScopePrivate = Частна
+SmartQueryScopeShared = Споделена
+SmartQueryOwner = Собственик
+SmartQuerySQL = SQL заявка
+SmartQuerySQLHelp = Позволени са само SELECT заявки. Използвайте {{име_параметър}} за динамични параметри.
+SmartQueryParameters = Параметри на заявката
+SmartQueryParamsJSON = Параметри (JSON)
+SmartQueryParamsJSONHelp = Формат: [{"name":"param1","label":"Етикет","type":"text|date|number","default":""}]
+SmartQueryResultLimit = Лимит на резултатите
+SmartQueryResults = Резултати
+SmartQueryNoResults = Няма резултати
+SmartQueryResultCount = %s резултата за %s ms
+SmartQueryExecutions = Изпълнения
+SmartQueryLastExec = Последно изпълнение
+SmartQueryCreatedDate = Създадена на
+SmartQueryModifiedDate = Последна промяна
+SmartQueryTestSQL = Тестване на заявката
+SmartQueryTestResults = Резултати от теста
+SmartQueryExecutionError = Грешка при изпълнението на заявката
+SmartQueryInvalidSQL = Невалидна SQL заявка: позволени са само SELECT заявки
+SmartQuerySQLValidationError = Грешка при SQL валидация: %s
+SmartQueryMissingSQLOrTitle = Заглавието и SQL заявката са задължителни
+SmartQueryNotFound = Заявката не е намерена или достъпът е отказан
+SmartQueryNotOwner = Не сте собственик на тази заявка
+SmartQuerySearchPlaceholder = Търсене на заявка...
+SmartQueryExportCSV = CSV експорт
+
+# Token usage badge & dashboard
+TokenBadgeLabel = %s / %s токени (%s%%)
+TokenBadgeTooltip = Текущ разговор
+TokenBadgeUsed = %s използвани токена
+TokenBadgeExchanges = %s размени
+TokenBadgeModel = Модел: %s (%s токена макс.)
+TokenBadgeLastCall = Последно повикване: %s вход + %s изход
+TokenUsageDashboardTitle = Табло — употреба на LLM токени
+TokenUsageGraphTitle = Консумирани токени на ден
+TokenUsageTab = Употреба на токени
+TokenUsageFilter = Филтриране
+TokenUsageNoData = Все още няма данни. Започнете разговор, за да видите числа тук.
+TokenUsagePeriod7 = 7 дни
+TokenUsagePeriod30 = 30 дни
+TokenUsagePeriod90 = 90 дни
+TokenUsageKpiTotal = Токени през последните 7 дни
+TokenUsageKpiInferences = Inferences през последните 7 дни
+TokenUsageKpiTopUser = Топ потребител
+TokenUsageKpiHeaviestThread = Най-тежък разговор
+TokenUsageTableTitle = Детайли по повикване
+TokenUsageColDate = Дата
+TokenUsageColUser = Потребител
+TokenUsageColThread = Разговор
+TokenUsageColModel = Модел
+TokenUsageColInput = Вход
+TokenUsageColOutput = Изход
+TokenUsageColDuration = Продължителност
+TokenUsageColTools = Tools
+TokenUsagePurgeButton = Изтриване на записи > 90 дни
+TokenUsagePurgeConfirm = Сигурни ли сте? Това действие ще изтрие всички записи на повече от 90 дни за този entity.
+TokenUsagePurgeDone = %s ред(а) изтрит(и)
+TokenUsageDbVersionLabel = Версия на DB схемата

@@ -1,0 +1,499 @@
+# Dalfred - English language file
+# Copyright (C) 2024 E-dem
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Module
+Module491408Name = Dalfred
+Module491408Desc = Intelligent AI Assistant for Dolibarr with MCP integration
+
+# Menu
+Dalfred = Dalfred
+Chat = Chat
+Conversations = Conversations
+
+# Setup pages
+DalfredSetup = Dalfred Setup
+GeneralSetup = General Setup
+AIConfiguration = AI Configuration
+ToolkitPermissions = Permissions
+Diagnostic = Diagnostic
+About = About
+
+# General configuration
+GeneralConfiguration = General Configuration
+
+ChatConfiguration = Chat Configuration
+ContextWindow = Context Window
+ContextWindowDesc = Maximum conversation context size in tokens
+MaxThreadsPerUser = Max Conversations per User
+MaxThreadsPerUserDesc = Maximum number of active conversations per user
+RequireUserApiKey = Require User API Key
+RequireUserApiKeyDesc = Each user must have their own Dolibarr API key
+
+RateLimitingConfiguration = Rate Limiting
+RateLimitRequests = Request Limit
+RateLimitRequestsDesc = Maximum requests per hour per user
+RateLimitTokens = Token Limit
+RateLimitTokensDesc = Maximum tokens per hour per user
+PerHour = per hour
+
+DebugConfiguration = Debug Configuration
+DebugMode = Debug Mode
+DebugModeDesc = Enable detailed logging for debugging
+LogConversations = Log Conversations
+LogConversationsDesc = Record conversations for analysis
+
+# AI configuration
+AIProviderSettings = AI Provider Settings
+AIProvider = AI Provider
+AIProviderDesc = Select the AI service provider
+AIModel = AI Model
+AIModelDesc = Model to use for conversations
+AnthropicAPIKey = Anthropic API Key
+AnthropicAPIKeyDesc = Your Anthropic API key (from console.anthropic.com)
+OpenAIAPIKey = OpenAI API Key
+OpenAIAPIKeyDesc = Your OpenAI API key (from platform.openai.com)
+MistralAPIKey = Mistral API Key
+MistralAPIKeyDesc = Your Mistral API key (from console.mistral.ai)
+GeminiAPIKey = Google Gemini API Key
+GeminiAPIKeyDesc = Your Google Gemini API key (from aistudio.google.com)
+ProviderAPIKey = API Key
+OllamaURL = Ollama Server URL
+OllamaURLDesc = Your local Ollama server URL (e.g. http://localhost:11434/api)
+OllamaURLRequired = Ollama server URL is required
+OllamaTimeout = HTTP timeout
+OllamaTimeoutDesc = Maximum time (in seconds) to wait for a single Ollama response. The default (300s) covers most self-hosted setups. Raise it if you run a large model on CPU and see cURL timeout errors. The NeuronAI library defaults to 60s, which is often too short.
+CloudHttpTimeout = Cloud providers HTTP timeout
+CloudHttpTimeoutDesc = Maximum time (in seconds) to wait for a response from cloud providers (Anthropic, OpenAI, Mistral, Gemini). The default (300s) covers long conversations with large context and many tools. The NeuronAI library defaults to 60s, which triggers "cURL error 28: Operation timed out" errors on loaded threads. Only lower it if you want to fail faster on network issues.
+ToolMaxRuns = Max tool invocations per turn
+ToolMaxRunsDesc = Maximum number of times a single tool may be invoked within one chat turn before the agent raises a quota error. Increase for complex analyses (e.g. 25-50 for multi-query SQL explorations). The NeuronAI library defaults to 10, too low for many legitimate workloads. Range: 5-100, default: 25. The anti-loop protection (3 consecutive identical calls) stays active regardless of this value.
+OllamaNumCtx = Context window (num_ctx)
+OllamaNumCtxDesc = Number of tokens the Ollama model can process in a single request (input + output combined). Ollama's built-in default (2048-4096) is too small for the Dalfred tool catalogue and causes truncated prompts. 16384 fits in 8-12 GB VRAM for a 7B model and is a safe default. Set to 0 to disable and use Ollama's built-in default (not recommended).
+Seconds = seconds
+OllamaModelPlaceholder = Model name (e.g. llama3, mistral, codellama...)
+CustomModelPlaceholder = Enter model name (e.g. claude-sonnet-4-5-20250514)...
+OtherCustomModel = Other (custom model)
+APIKeyAlreadyConfigured = ✓ API key already configured (leave empty to keep current)
+MaxTokens = Max Tokens
+MaxTokensDesc = Maximum tokens for each response
+
+TestConnection = Test Connection
+TestConnectionDesc = Verify that the API connection works correctly
+AIConnectionSuccess = API connection successful!
+AIConnectionFailed = API connection failed
+APIKeyRequired = API key is required
+APIKeyNotConfigured = API key not configured
+
+ImportantNote = Important Note
+APIKeyStoredSecurely = The API key is stored securely in the database
+GetAPIKeyFrom = Get your API key from
+CostsApply = Usage fees apply based on your consumption
+
+# Toolkit permissions
+MySQLToolkitGlobalSettings = MySQL Toolkit Global Activation
+MySQLSchemaEnable = Allow database schema introspection
+MySQLSchemaEnableDesc = Lets the agent inspect table structure (DESCRIBE, SHOW CREATE TABLE) so it uses correct column names. Does not expose any business data. Recommended: ON.
+MySQLToolkitEnable = Enable MySQL Toolkit (read access to database)
+MySQLToolkitWriteEnable = Enable MySQL write (allows AI to modify data)
+MySQLToolkitGloballyDisabled = MySQL Toolkit is globally disabled. Enable it above for user permissions to take effect.
+MySQLToolkitWarning = The MySQL Toolkit allows the AI to execute SQL queries directly on your database. This may present security risks. Only enable this feature for trusted users.
+MySQLReadAccess = MySQL Access (read)
+MySQLWriteAccess = MySQL Access (write)
+MySQLReadAccessDesc = Allows the user to use the MySQL toolkit to read data
+MySQLWriteAccessDesc = Allows the user to modify data via MySQL (DANGEROUS)
+ToolkitPermissionsInfo = Permissions Information
+MySQLToolkitRecommendation = Recommendation: Only enable write access for administrators and only if absolutely necessary.
+ReadOnly = Read Only
+ReadWrite = Read/Write
+Disabled = Disabled
+PermissionsUpdated = Permissions updated
+
+# About page
+ModuleInformation = Module Information
+ModuleName = Module Name
+Version = Version
+Author = Author
+License = License
+Description = Description
+DalfredDescription = Dalfred is an intelligent AI assistant that helps users interact with their Dolibarr system using natural language. It uses Claude AI and the MCP protocol to execute actions.
+Features = Features
+FeatureNaturalLanguage = Natural language interaction with Dolibarr
+FeatureMCP = MCP integration to execute actions (create, modify, delete)
+FeatureToolkits = Built-in toolkits (Calculator, Calendar, MySQL)
+FeatureConversationHistory = Persistent conversation history
+FeaturePermissions = Granular permission system
+TechnicalInformation = Technical Information
+PHPVersion = PHP Version
+DolibarrVersion = Dolibarr Version
+MCPServer = MCP Server
+Support = Support
+SupportInfo = For help or to report an issue, consult the module documentation or contact support.
+
+# Permissions
+Permission49140801 = Use Dalfred assistant
+Permission49140802 = Manage own conversations
+Permission49140803 = View all conversations
+Permission49140804 = Configure Dalfred module
+
+# Chat interface
+NewConversation = New conversation
+TypeYourMessage = Type your message
+WelcomeMessage = Hello %s!
+ConfirmClearConversation = Are you sure you want to clear this conversation and start a new one?
+
+# Chat interface - Welcome & Suggestions
+WelcomeIntro = I am %s, your Dolibarr AI assistant. I can help you navigate, search and manage your data.
+SuggestionUnpaidInvoices = Show my unpaid invoices
+SuggestionMonthlyRevenue = What is my revenue this month?
+SuggestionRecentClients = List my recent clients
+SuggestionCreateInvoice = Help me create an invoice
+SuggestionLabelUnpaidInvoices = Unpaid invoices
+SuggestionLabelMonthlyRevenue = Monthly revenue
+SuggestionLabelRecentClients = Recent clients
+SuggestionLabelCreateInvoice = New invoice
+
+# Chat interface - Widget
+WidgetTitle = %s - AI Assistant
+WidgetOnline = Online
+WidgetMemory = Memory
+WidgetFullscreen = Open fullscreen
+WidgetNewConversation = New conversation
+WidgetClose = Close
+WidgetPlaceholder = Ask your question...
+WidgetSend = Send
+WidgetWelcomeTitle = Hello! I'm %s, your Dolibarr assistant
+WidgetWelcomeIntro = I can help you with:
+WidgetHelpSearch = Search clients, invoices, orders
+WidgetHelpAnalyze = Analyze your data and statistics
+WidgetHelpCreate = Create new items
+WidgetHelpQuestions = Answer your Dolibarr questions
+WidgetTryExample = Try: "My unpaid invoices" or "Monthly revenue"
+WidgetClearConfirm = Clear the conversation and start a new one?
+WidgetFullscreenLabel = fullscreen
+WidgetWidgetLabel = widget
+
+# Chat interface - Error messages
+ErrorServer = Server error (%s)
+ErrorInvalidResponse = Invalid server response
+ErrorGeneric = An error occurred. Please try again.
+ErrorNetwork = Network connection problem.
+
+# Threads/Conversations list
+AllConversations = All conversations
+ActiveConversations = Active conversations
+ArchivedConversations = Archived conversations
+NoConversationsYet = You don't have any conversations yet. Start a new one!
+StartNewConversation = Start a conversation
+UntitledConversation = Untitled conversation
+BackToChat = Back to chat
+ThreadDeleted = Conversation deleted
+ThreadArchived = Conversation archived
+ThreadReopened = Conversation reopened
+ErrorDeletingThread = Error deleting conversation
+ConfirmDeleteThread = Are you sure you want to delete this conversation? This action cannot be undone.
+Open = Open
+Archive = Archive
+Reopen = Reopen
+Delete = Delete
+Active = Active
+Archived = Archived
+LastMessage = Last message
+Created = Created
+Title = Title
+Status = Status
+Actions = Actions
+
+# Activity Log
+ActivityLog = Activity Log
+DalfredActivityLog = Dalfred Activity Log
+ActivityLogDesc = %s events recorded in total
+NoActivityLogs = No activity logs
+EventType = Event Type
+ToolName = Tool
+ThreadID = Thread
+Duration = Duration
+Details = Details
+PurgeOldLogs = Purge logs older than %s days
+PurgeAllLogs = Purge all logs
+ConfirmPurgeAll = Are you sure you want to delete ALL activity logs?
+LogsPurged = %s logs deleted
+Search = Search
+Reset = Reset
+All = All
+
+# System Prompt
+SystemPromptConfiguration = Additional Instructions
+SystemPromptDesc = Add specific instructions that will be appended to the assistant's base prompt. The base prompt (behavior, tools, rules) is always preserved and cannot be modified. Your instructions will be added after it. Examples: company information, internal procedures, response preferences.
+SystemPromptPlaceholder = Add specific instructions for your company here (optional)...
+ShowFullPromptPreview = Show full prompt
+HideFullPromptPreview = Hide full prompt
+FullPromptPreviewInfo = This is a preview of the complete prompt as it will be sent to the AI. Dynamic sections (user, page, memory) are indicated by placeholders [...]. The content between "Specific instructions" and "Current user" corresponds to your custom instructions above.
+
+# Common
+Save = Save
+SetupSaved = Configuration saved
+ErrorSavingConfig = Error while saving configuration
+Error = Error
+Warning = Warning
+Value = Value
+Action = Action
+NoUsers = No users found
+User = User
+
+# Knowledge / Memory
+KnowledgeMemory = Memory
+KnowledgeManagement = Memory Management
+KnowledgeEntries = Memory Entries
+KnowledgeEntry = Memory Entry
+KnowledgeTitle = Title
+KnowledgeContent = Content
+KnowledgeCategory = Category
+KnowledgeScope = Scope
+KnowledgeScopePrivate = Private
+KnowledgeScopeShared = Shared
+KnowledgeDate = Creation Date
+KnowledgeAdd = Add Entry
+KnowledgeEdit = Edit Entry
+KnowledgeDelete = Delete Entry
+KnowledgeDeleteConfirm = Are you sure you want to delete this memory entry?
+KnowledgeDeleteAllConfirm = Are you sure you want to delete ALL memory entries?
+KnowledgeSaved = Entry saved
+KnowledgeUpdated = Entry updated
+KnowledgeDeleted = Entry deleted
+KnowledgeDeleteAll = Delete All
+KnowledgeNoEntries = No memory entries
+KnowledgeSearchPlaceholder = Search memory...
+KnowledgeAllCategories = All categories
+KnowledgeAllScopes = All scopes
+KnowledgeAllUsers = All users
+KnowledgeAdminDesc = %s total memory entries (all users)
+KnowledgeUserDesc = Your memory: private entries and shared entries
+BackToChat = Back to chat
+AddNewEntry = Add entry
+Owner = Owner
+
+# Permissions & User Management
+UserManagement = User Management
+UserManagementDesc = Overview of user rights and access to Dalfred
+DalfredAccess = Dalfred Access
+ApiKey = API Key
+ApiKeyConfigured = Configured
+ApiKeyMissing = Missing
+ApiKeyGenerated = API key generated for user %s
+GenerateApiKey = Generate
+GenerateApiKeyConfirm = Generate an API key for this user? They will be able to use it to access the Dolibarr API.
+UserNoDalfredRight = This user does not have the right to use Dalfred
+UserReady = Ready
+UserNotReady = Not configured
+UserReadyDesc = User has Dalfred permission and a configured API key
+PermissionsHowTo = To grant Dalfred access to a user, go to the user's card (Home > Users & Groups), "Permissions" tab, and enable the "%s" permission.
+
+# Smart Queries
+SmartQueries = Smart Queries
+SmartQueryDesc = Your saved SQL queries. Create them via Dalfred chat or execute them directly here.
+SmartQueryEntries = Saved Queries
+SmartQueryTitle = Title
+SmartQueryCategory = Category
+SmartQueryScope = Scope
+SmartQuerySQL = SQL Query
+SmartQueryExecutions = Executions
+SmartQueryLastExec = Last Execution
+SmartQueryExecute = Execute
+SmartQueryExportCSV = CSV Export
+SmartQueryResults = Results
+SmartQueryBackToList = Back to List
+SmartQueryParameters = Query Parameters
+SmartQueryResultLimit = Result Limit
+SmartQueryResultCount = %s results in %s ms
+SmartQueryNoResults = No results
+SmartQueryNoEntries = No saved queries. Use Dalfred chat to create your first queries.
+SmartQueryNotFound = Query not found or access denied
+SmartQueryDeleted = Query deleted
+SmartQueryDeleteConfirm = Are you sure you want to delete this query?
+SmartQueryInvalidSQL = Invalid SQL query: only SELECT queries are allowed
+SmartQueryExecutionError = Error executing query
+SmartQuerySearchPlaceholder = Search queries...
+SmartQueryEnable = Enable Smart Queries (saved SQL queries)
+SmartQueryCard = Query Details
+SmartQueryNew = New Query
+SmartQueryCreate = Create a Query
+SmartQueryEdit = Edit
+SmartQueryDuplicate = Duplicate
+SmartQuerySave = Save
+SmartQuerySaved = Query saved successfully
+SmartQueryUpdated = Query updated successfully
+SmartQueryDuplicated = Query duplicated successfully
+SmartQueryCreated = Query created successfully
+SmartQueryTestSQL = Test Query
+SmartQueryTestResults = Test Results
+SmartQueryView = View
+SmartQueryDescription = Description
+SmartQueryScopePrivate = Private
+SmartQueryScopeShared = Shared
+SmartQuerySQLHelp = Only SELECT queries are allowed. Use {{parameter_name}} for dynamic parameters.
+SmartQueryParamsJSON = Parameters (JSON)
+SmartQueryParamsJSONHelp = Format: [{"name":"param1","label":"Label","type":"text|date|number","default":""}]
+SmartQueryCreatedDate = Created
+SmartQueryModifiedDate = Last modified
+SmartQueryOwner = Owner
+SmartQueryNotOwner = You are not the owner of this query
+SmartQueryMissingSQLOrTitle = Title and SQL query are required
+SmartQuerySQLValidationError = SQL validation error: %s
+SmartQueryCategoryList = customers,invoices,orders,products,suppliers,accounting,hr,stock,other
+SmartQueryNoCategory = No category
+SmartQueryConfirmDelete = Are you sure you want to delete this query?
+SmartQueryBackToCard = Back to details
+Never = Never
+Permission49140805 = Use Smart Queries (saved SQL queries)
+DalfredBrandingTab=Branding
+DalfredBrandingTitle=Visual branding
+DalfredBrandingDesc=Customize the agent's name, logo and colors to match your identity. Empty fields fall back to Dalfred defaults.
+DalfredBrandName=Agent name
+DalfredBrandNameDesc=Name displayed instead of "Dalfred" across the UI (50 chars max).
+DalfredBrandLogo=Logo
+DalfredBrandLogoDesc=PNG, SVG or JPG, 2 MB max. Replaces the default icon.
+DalfredBrandLogoCurrent=Current logo
+DalfredBrandLogoRemove=Remove logo
+DalfredBrandColorPrimary=Primary color
+DalfredBrandColorSecondary=Secondary color
+DalfredBrandReset=Reset to defaults
+DalfredBrandPreview=Preview
+DalfredBrandSaved=Branding saved.
+DalfredBrandLogoTooLarge=Logo exceeds 2 MB.
+DalfredBrandLogoBadFormat=Logo format not accepted (PNG, SVG or JPG only).
+DalfredBrandLogoBadContent=Invalid logo content.
+AttachmentsEnabled=Enable attachments
+AttachmentsEnabledDesc=Lets users attach text and image files to conversations.
+AttachmentButton=Attach a file
+AttachmentDropZone=Drop your files here
+AttachmentTooLarge=%s: too large (max %s)
+AttachmentTooMany=Maximum %d files per message
+AttachmentBadType=%s: unsupported type
+AttachmentExpired=File expired
+
+# Diagnostic page (admin)
+DiagPageIntro=Inspect the web stack between the browser and PHP, and recommend the right timeout settings to avoid 504 errors on long AI answers.
+DiagSectionStack=Detected stack
+DiagRowPhp=PHP
+DiagRowWebserver=Web server
+DiagRowReverseProxy=Reverse proxy in front
+DiagRowCdn=CDN
+DiagRowPanel=Hosting control panel
+DiagBadgeYes=Yes
+DiagBadgeUnknown=Unknown
+DiagBadgeUndetected=Not detected
+DiagBadgeFinishOk=fastcgi_finish_request OK
+DiagBadgeFinishKo=fastcgi_finish_request unavailable
+DiagPhpMaxExec=max_execution_time
+DiagProxyRealIp=Real client IP
+DiagProxyNoneHint=PHP appears to talk directly to the front-facing server
+DiagCdnNoneHint=No CDN detected in headers
+DiagPanelNoneHint=No panel detected (Plesk, cPanel, DirectAdmin)
+DiagSectionRecos=Recommendations for long timeouts (%d s — see note below)
+DiagRecosNote=The values below are the <strong>recommended minimums</strong> to comfortably absorb long AI answers (slow models, chained tools, large prompts). <strong>180 s</strong> is enough for most cases, <strong>600 s</strong> is a generous upper bound that still kills genuinely runaway requests. Adjust to your usage.
+DiagRecosNone=No specific recommendation: stack not identified.
+DiagSectionTest=Test a long request
+DiagTestIntro=Sends an AJAX request that forces the server to sleep for N seconds. If it succeeds, the stack supports that duration. If it times out, the browser will show the precise error (504 or other) and the elapsed time will reveal which component cut it.
+DiagTestDuration=Sleep duration:
+DiagTestSecondsFmt=%d seconds
+DiagTestSanityCheck=%d seconds (sanity check)
+DiagTestMax=%d seconds (max)
+DiagTestRun=▶ Run the test
+DiagTestRunning=⏳ Request running… (max %ds)
+DiagTestOk=✅ Test OK
+DiagTestKo=❌ Failed
+DiagTestResultOk=✅ Response received after %s s
+DiagTestResultKo=❌ The request failed after %s s
+DiagTestStatusHttp=HTTP status
+DiagTestServerSide=Server side: sleep of %ds, measured %ss
+DiagTestHints=Note the elapsed time carefully: it tells you which component cut. Hints: ~30 s = PHP max_execution_time — ~60 s = nginx/Apache default — ~100 s = Cloudflare free/Pro — ~120 s = nginx fastcgi_read_timeout default.
+DiagSectionReport=Report (paste into your support email)
+DiagReportCopy=📋 Copy to clipboard
+DiagReportCopied=✅ Copied
+DiagReportCopyFail=❌ Could not copy — please select the text manually.
+
+# Slash commands (2.14.0)
+KnowledgeCommandName = Command name
+KnowledgeCommandNameHelp = Optional. When filled, this entry becomes a slash command invoked by /<name>. Format: lowercase letters, digits, hyphens only (max 64 characters).
+KnowledgeCommandPlaceholder = e.g. invoices-this-month
+KnowledgeCommandInvalidName = Invalid command name. Use lowercase letters, digits and hyphens only (max 64 characters).
+KnowledgeCommandNameTaken = This command name is already in use.
+KnowledgeFilterAll = Show all
+KnowledgeFilterKnowledge = Knowledge only
+KnowledgeFilterCommands = Commands only
+KnowledgeColCommand = Command
+KnowledgeTestCommand = Test command
+
+# === File generation (2.17.0) ===
+FileGenerationToolkit=File generation
+EnableFileGeneration=Allow the agent to create files
+FileGenerationDescription=The agent can create TXT/CSV/HTML/MD/JSON files in each user's personal directory. Files are downloadable from "My files".
+FileGenerationMaxSize=Maximum file size (MB)
+FileGenerationGloballyDisabled=File generation is globally disabled
+MyGeneratedFiles=My generated files
+MyFiles=My files
+NoFilesGenerated=No files generated yet
+FileGenerationDisabledByAdmin=File generation is disabled by the administrator
+ConfirmDeleteFile=Confirm deletion of %s?
+FileDeleted=File deleted
+ErrorDeletingFile=Error while deleting the file
+ErrorInvalidFilename=Invalid filename
+FileSize=Size
+FileCreatedAt=Created at
+DownloadFile=Download
+DeleteFile=Delete
+
+# === Token usage badge (2.20.0) ===
+TokenBadgeLabel=%s / %s tokens (%s%%)
+TokenBadgeTooltip=Context saturation
+TokenBadgeExchanges=%s exchanges
+TokenBadgeUsed=%s tokens used
+TokenBadgeModel=Model: %s (%s tokens max)
+TokenBadgeLastCall=Last call: %s input + %s output
+TokenBadgeContextCurrent=Current context: %s / %s (%s%%)
+TokenBadgeCumulative=Thread cumulative: %s tokens spent
+
+# === Token usage admin dashboard (2.20.0) ===
+TokenUsageTab=Token usage
+TokenUsageDashboardTitle=Dashboard — LLM token usage
+TokenUsageKpiTotal=Tokens last 7 days
+TokenUsageKpiInferences=Inferences last 7 days
+TokenUsageKpiTopUser=Top user
+TokenUsageKpiHeaviestThread=Heaviest conversation
+TokenUsageGraphTitle=Tokens consumed per day
+TokenUsagePeriod7=7 days
+TokenUsagePeriod30=30 days
+TokenUsagePeriod90=90 days
+TokenUsageTableTitle=Per-call details
+TokenUsageColDate=Date
+TokenUsageColUser=User
+TokenUsageColThread=Conversation
+TokenUsageColModel=Model
+TokenUsageColInput=Input
+TokenUsageColOutput=Output
+TokenUsageColDuration=Duration
+TokenUsageColTools=Tools
+TokenUsagePurgeButton=Purge records > 90 days
+TokenUsagePurgeConfirm=Are you sure? This will delete every record older than 90 days for this entity.
+TokenUsagePurgeDone=%s row(s) deleted
+TokenUsageDbVersionLabel=DB schema version
+TokenUsageNoData=No data yet. Start a conversation to see numbers appear here.
+TokenUsageFilter=Filter
+
+# Activity log debug (v2.21.0)
+View=View
+LogDetailTitle=Event detail
+
+# Missing keys patched in v2.21.1
+Maintenance=Maintenance
+ResultsPerPage=Results per page
+MySQLSchemaEnable=Enable MySQL schema introspection
+MySQLSchemaEnableDesc=Allows the agent to explore your database structure (tables, columns, relationships) so it can answer schema questions. Read-only, never modifies data.
+
+# Tool payload truncation (v2.24.0)
+DalfredToolPayloadMaxTokens=Tool payload truncation threshold (tokens)
+DalfredToolPayloadMaxTokensHelp=Above this threshold, large tool inputs and results are replaced by a placeholder in the chat history to save LLM context. Default: 2000. Set to 0 to disable.
