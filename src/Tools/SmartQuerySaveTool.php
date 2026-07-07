@@ -59,11 +59,19 @@ class SmartQuerySaveTool extends Tool
                 description: 'JSON des paramètres dynamiques: [{"name":"date_start","label":"Date début","type":"date","default":"","required":true}]. Types: date, number, text',
                 required: false,
             ),
+            ToolProperty::make(
+                name: 'scope',
+                type: PropertyType::STRING,
+                description: 'Portée : "private" (visible uniquement par le propriétaire, défaut) ou "shared" (visible par tous les utilisateurs).',
+                required: false,
+            ),
         ];
     }
 
-    public function __invoke(string $title, string $sql_query, ?string $description = null, ?string $category = null, ?string $parameters = null): string
+    public function __invoke(string $title, string $sql_query, ?string $description = null, ?string $category = null, ?string $parameters = null, ?string $scope = null): string
     {
+        $scopeValue = in_array($scope, ['private', 'shared'], true) ? $scope : 'private';
+
         // Validate SQL is SELECT only
         $validation = $this->validateSQL($sql_query);
         if (!$validation['valid']) {
@@ -110,7 +118,7 @@ class SmartQuerySaveTool extends Tool
             . "'" . $this->db->escape($sql_query) . "', "
             . ($category ? "'" . $this->db->escape($category) . "'" : "NULL") . ", "
             . ($parameters ? "'" . $this->db->escape($parameters) . "'" : "NULL") . ", "
-            . "'private', "
+            . "'" . $this->db->escape($scopeValue) . "', "
             . "NOW()"
             . ")";
 

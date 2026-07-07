@@ -18,7 +18,7 @@ class SmartQueryUpdateTool extends Tool
     {
         parent::__construct(
             name: 'smart_query_update',
-            description: 'Modifier une requête Smart Query existante (titre, SQL, description, catégorie). Seul le propriétaire peut modifier.',
+            description: 'Modifier une requête Smart Query existante (titre, SQL, description, catégorie, portée private/shared). Seul le propriétaire peut modifier.',
         );
 
         $this->db = $db;
@@ -65,10 +65,16 @@ class SmartQueryUpdateTool extends Tool
                 description: 'Nouveau JSON des paramètres (optionnel)',
                 required: false,
             ),
+            ToolProperty::make(
+                name: 'scope',
+                type: PropertyType::STRING,
+                description: 'Nouvelle portée : "private" (visible uniquement par le propriétaire) ou "shared" (visible par tous les utilisateurs). Optionnel.',
+                required: false,
+            ),
         ];
     }
 
-    public function __invoke(int $query_id, ?string $title = null, ?string $sql_query = null, ?string $description = null, ?string $category = null, ?string $parameters = null): string
+    public function __invoke(int $query_id, ?string $title = null, ?string $sql_query = null, ?string $description = null, ?string $category = null, ?string $parameters = null, ?string $scope = null): string
     {
         // Check ownership
         $sql = "SELECT rowid, fk_user FROM " . MAIN_DB_PREFIX . "dalfred_smart_queries"
@@ -123,6 +129,15 @@ class SmartQueryUpdateTool extends Tool
         }
         if ($parameters !== null) {
             $sets[] = "parameters = '" . $this->db->escape($parameters) . "'";
+        }
+        if ($scope !== null) {
+            if (!in_array($scope, ['private', 'shared'], true)) {
+                return json_encode([
+                    'success' => false,
+                    'error' => 'Portée invalide : utilise "private" ou "shared".',
+                ], JSON_UNESCAPED_UNICODE);
+            }
+            $sets[] = "scope = '" . $this->db->escape($scope) . "'";
         }
 
         if (empty($sets)) {
