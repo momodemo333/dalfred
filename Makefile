@@ -31,3 +31,6 @@ build-source: ## Build a source ZIP without private release dependencies
 clean: ## Remove local build artifacts
 	@rm -rf $(BUILD_DIR)
 	@echo "Build directory cleaned."
+
+# Optional local extension (release/publish/test-harness targets, gitignored)
+-include Makefile.local

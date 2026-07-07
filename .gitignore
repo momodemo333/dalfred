@@ -61,3 +61,20 @@ dolibarr-mcp-server/
 *.log
 *.sql.gz
 *.dump
+
+# Local dev test scripts (not for the public repo)
+/test_cli.php
+/test_ajax.php
+/test/
+
+# Local dev assets restored from backup (never for the public repo)
+/CLAUDE.md
+/dev/
+/tools/
+/scripts/
+/marketing/
+/.superpowers/
+/docs/superpowers/
+/.emgateway.conf
+/.gitlab-ci.yml
+/Makefile.local

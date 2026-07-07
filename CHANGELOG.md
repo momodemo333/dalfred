@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.25.0] - 2026-07-07
+
+### Added
+- **Smart Queries can now be shared (or made private again) through the agent**: the `smart_query_update` tool gained a `scope` parameter (`private`/`shared`) and `smart_query_save` accepts an optional `scope` at creation time (default stays `private`). Previously the tool schema did not expose the field at all, so when a user asked the agent to share a saved query, the model would pass `scope` anyway and the call crashed with `Unknown named parameter $scope` — the agent retried, failed silently each time, and eventually gave up (observed live during a customer demo). Invalid values are rejected with an explicit error; ownership rules are unchanged (only the owner can modify a query). Covered by the new `tests/SmartQueryScopeTest.php`.
+
+### Changed
+- **DirectMcpBridge adapted to the official MCP PHP SDK**: the embedded dolibarr-mcp-server migrated from `php-mcp/server` to the official `mcp/sdk`, moving the `McpTool` and `Schema` attributes to the `Mcp\Capability\Attribute` namespace. Only the imports changed — reflection, coercion and error handling are untouched. Validated in the PHP 8.1 container with all 20 tools loading and executing.
+- The embedded MCP server now normalizes `{"id": …}` / `{"rowid": …}` list filters into `t.rowid` sqlfilters, because many Dolibarr list endpoints silently ignore raw `id` query params (see the dolibarr-mcp-server changelog for details).
+
+### Fixed
+- **`DalfredMigrations::MODULE_VERSION` resynchronized with the module version**: the constant was lagging at 2.23.0 while the descriptor was at 2.24.3. No migration above 2.22.0 exists yet so nothing was actually skipped, but any future migration tagged above 2.23.0 would silently never run on customer installs. Both versions are now bumped together, as required.
+
 This public repository starts from the Dalfred 2.24.x codebase.
 
 Earlier private development history is intentionally not imported because it contained internal development notes and environment-specific information that are not suitable for a public repository.
