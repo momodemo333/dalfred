@@ -48,7 +48,7 @@ $configServiceFile = __DIR__.'/../src/Service/ConfigService.php';
 if (file_exists($configServiceFile)) {
     require_once $configServiceFile;
     if (class_exists('Dalfred\\Service\\ConfigService')) {
-        $configService = new \Dalfred\Service\ConfigService($db);
+        $configService = new \Dalfred\Service\ConfigService($db, (int) $conf->entity);
     }
 }
 
@@ -89,6 +89,16 @@ if ($resql && ($obj = $db->fetch_object($resql))) {
 
 // Web server
 $web_server = $_SERVER['SERVER_SOFTWARE'] ?? 'Inconnu';
+
+// URL diagnostics
+$dolibarr_full_url = '';
+if (!empty($conf->global->MAIN_URL_ROOT)) {
+    $dolibarr_full_url = $conf->global->MAIN_URL_ROOT;
+} elseif (defined('DOL_MAIN_URL_ROOT')) {
+    $dolibarr_full_url = DOL_MAIN_URL_ROOT;
+}
+$dolibarr_web_path = defined('DOL_URL_ROOT') ? DOL_URL_ROOT : '';
+$dolibarr_api_endpoint = $dolibarr_full_url !== '' ? rtrim($dolibarr_full_url, '/').'/api/index.php' : 'Non détectée';
 
 // Module path
 $module_path = dol_buildpath('/dalfred', 0);
@@ -252,7 +262,9 @@ $support_text .= "Modèle IA : ".$ai_model."\n";
 $support_text .= "Mode async : ".$async_label."\n";
 $support_text .= "Module API REST : ".$api_rest_active."\n";
 $support_text .= "Entités avec clé API : ".$nb_api_users."\n";
-$support_text .= "URL de base : ".DOL_URL_ROOT."\n";
+$support_text .= "URL racine Dolibarr : ".$dolibarr_full_url."\n";
+$support_text .= "Endpoint API REST : ".$dolibarr_api_endpoint."\n";
+$support_text .= "Chemin web Dolibarr : ".$dolibarr_web_path."\n";
 $support_text .= "Chemin module : ".$module_path."\n";
 $support_text .= "Extensions PHP : ".$extensions_str."\n";
 $support_text .= "--- Fin ---";
@@ -283,7 +295,9 @@ print '<tr class="oddeven"><td>Modèle IA</td><td><code>'.dol_escape_htmltag($ai
 print '<tr class="oddeven"><td>Mode async</td><td>'.$async_label.'</td></tr>';
 print '<tr class="oddeven"><td>Module API REST</td><td>'.$api_rest_active.'</td></tr>';
 print '<tr class="oddeven"><td>Entités avec clé API</td><td>'.$nb_api_users.'</td></tr>';
-print '<tr class="oddeven"><td>URL de base Dolibarr</td><td><code>'.dol_escape_htmltag(DOL_URL_ROOT).'</code></td></tr>';
+print '<tr class="oddeven"><td>URL racine Dolibarr</td><td><code>'.dol_escape_htmltag($dolibarr_full_url).'</code></td></tr>';
+print '<tr class="oddeven"><td>Endpoint API REST utilisé</td><td><code>'.dol_escape_htmltag($dolibarr_api_endpoint).'</code></td></tr>';
+print '<tr class="oddeven"><td>Chemin web Dolibarr</td><td><code>'.dol_escape_htmltag($dolibarr_web_path).'</code></td></tr>';
 print '<tr class="oddeven"><td>Chemin du module</td><td><code>'.dol_escape_htmltag($module_path).'</code></td></tr>';
 
 // Extensions PHP

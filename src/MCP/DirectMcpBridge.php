@@ -7,6 +7,7 @@ namespace Dalfred\MCP;
 use DolibarrMcp\Bootstrap;
 use DolibarrMcp\Client\DolibarrClient;
 use DolibarrMcp\Client\ApiSchemaClient;
+use DolibarrMcp\Config\ConnectionConfig;
 use DolibarrMcp\Container;
 use DolibarrMcp\Support\FieldMapper;
 use NeuronAI\Tools\Tool;
@@ -36,18 +37,17 @@ class DirectMcpBridge
 
     public function __construct(string $dolibarrUrl, string $apiKey)
     {
-        // Set env vars for DolibarrClient::fromEnvironment()
-        putenv('DOLIBARR_URL=' . $dolibarrUrl);
-        putenv('DOLIBARR_API_KEY=' . $apiKey);
-
         // Load the MCP server autoloader
         $mcpAutoloader = $this->findMcpAutoloader();
         if ($mcpAutoloader && !class_exists(Bootstrap::class, false)) {
             require_once $mcpAutoloader;
         }
 
-        // Build the container (creates DolibarrClient, ApiSchemaClient, etc.)
-        $this->container = Bootstrap::createContainer();
+        // Build a request-scoped container with explicit credentials. Avoid using
+        // process-wide environment variables here: PHP-FPM workers may handle
+        // several users/entities over their lifetime, and explicit config is safer
+        // for multicompany installations.
+        $this->container = Bootstrap::createContainer(new ConnectionConfig($dolibarrUrl, $apiKey));
     }
 
     /**
