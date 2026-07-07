@@ -59,7 +59,7 @@ class modDalfred extends DolibarrModules
         $this->descriptionlong = "Dalfred is an intelligent AI assistant that helps users interact with their Dolibarr ERP/CRM system using natural language. It uses Claude AI and MCP (Model Context Protocol) to execute actions.";
 
         // Version
-        $this->version = '2.25.0';
+        $this->version = '2.26.0';
         $this->url_last_version = 'https://www.e-dem.com/dolibarr/dalfred/last_version.php';
 
         // Const name for module status

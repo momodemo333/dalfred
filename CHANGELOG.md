@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.26.0] - 2026-07-07
+
+### Fixed
+- **"Create a project" (and any tool call with an imperfect resource name) no longer fails with an opaque CSRF/HTML error** (customer report): the embedded MCP server now canonicalizes resource names on every tool — singular (`project` → `projects`), capitalization (`Invoices` → `invoices`), underscores (`supplier_invoices` → `supplierinvoices`) and frequent French nouns (`facture`, `devis`, `tiers`) are auto-corrected when they match a known Dolibarr core endpoint, while custom-module endpoint names pass through untouched. Endpoints can no longer escape `/api/index.php/` via a leading slash (the actual mechanism behind the CSRF page), and non-API error responses are turned into short actionable messages instead of kilobytes of raw HTML. See the dolibarr-mcp-server changelog for details; validated end-to-end on a live instance (agent-driven project creation, French/singular/case variants, unknown-resource error path).
+- **Support diagnostics (admin "About" page) now show the real Dolibarr root URL and REST endpoint** instead of only `DOL_URL_ROOT`, which can legitimately be empty on root installations and was misleading during support analysis.
+
+### Changed
+- **MCP connection is request-scoped for embedded Dalfred calls**: Dalfred passes the Dolibarr URL and the current user's API key directly to the embedded MCP container (`ConnectionConfig`) instead of mutating process-wide environment variables. This is safer for PHP-FPM worker reuse and multicompany contexts.
+
 ## [2.25.0] - 2026-07-07
 
 ### Added
