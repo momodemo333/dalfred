@@ -26,7 +26,7 @@ final class ProviderCapabilities
      */
     private const VISION_MODELS = [
         'openai'  => ['gpt-5', 'gpt-4o', 'gpt-4-turbo', 'gpt-4-vision', 'gpt-4.1', 'o1', 'o3'],
-        'mistral' => ['pixtral'],
+        'mistral' => ['pixtral', 'mistral-large', 'mistral-medium', 'mistral-small', 'ministral-', 'magistral-small'],
         'ollama'  => ['llava', 'bakllava', 'llama3.2-vision', 'minicpm-v', 'moondream'],
     ];
 

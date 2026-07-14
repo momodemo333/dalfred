@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.26.1] - 2026-07-14
+
+### Changed
+- **Cloud model lists refreshed (July 2026)** — IDs were reconciled with the providers' official catalogues and live `/models` endpoints, then checked through Dalfred's native API surfaces:
+  - **Anthropic**: added **Claude Fable 5** (`claude-fable-5`) and **Claude Sonnet 5** (`claude-sonnet-5`), retained every currently returned Claude API model, and switched pre-4.6 entries to their pinned IDs. Opus 4.8 remains the first recommended selector entry and provider-switch fallback; the existing configured default remains Sonnet 4.6.
+  - **OpenAI**: added **GPT-5.6 Sol** (`gpt-5.6-sol`, flagship of the GPT-5.6 family launched 2026-07-09, new recommended model). The two sibling tiers are deliberately not listed yet: `gpt-5.6-terra` consistently returns "insufficient permissions" on standard keys (verified-org gated) and `gpt-5.6-luna` still fails intermittently with the same 401 during the ongoing rollout (~2 failures out of 5 pings on 2026-07-14). Both remain reachable through the "Other / Custom" entry and already resolve to the right context window in `ModelCapacityRegistry`; relist them once `tools/check_models.php` passes reliably. Previous GPT-5.x/4.x entries are all still active and kept.
+  - **Mistral**: removed deprecated `magistral-medium-latest`; refreshed the general, reasoning, code and Ministral families using maintained `*-latest` aliases whose API metadata confirms chat completion and function calling support. Mistral Medium 3.5 is now the first recommended entry and provider-switch fallback instead of Mistral Large.
+  - **Gemini**: completed the current general-purpose catalogue with Gemini 3 Flash Preview plus the still-active Gemini 2.5 Pro and Flash-Lite; media, Live, agent-only and shut-down models remain excluded.
+- **Model metadata**: refreshed context windows from the live provider metadata (Claude 5/4.6/4.5, GPT-5.6, current Mistral/Ministral families and Gemini), and aligned Mistral image-upload capability with the current multimodal model metadata.
+
+### Added
+- **`tests/ConfigServiceModelListsTest.php`**: static invariants on the curated model lists — non-empty per cloud provider, IDs consistent with the provider-prefix contract used by the provider-switch fallback, every exposed model resolves to a real capacity in `ModelCapacityRegistry` (never the generic 150k fallback), and presence/absence of the July 2026 key models.
+
 ## [2.26.0] - 2026-07-07
 
 ### Fixed

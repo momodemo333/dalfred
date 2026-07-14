@@ -161,7 +161,7 @@ class ConfigService
         $prefixes = [
             'anthropic' => ['claude-'],
             'openai'    => ['gpt-', 'o3-', 'o4-'],
-            'mistral'   => ['mistral-', 'magistral', 'codestral', 'open-mistral'],
+            'mistral'   => ['mistral-', 'ministral-', 'magistral', 'codestral', 'open-mistral'],
             'gemini'    => ['gemini-'],
         ];
 
@@ -489,26 +489,44 @@ class ConfigService
      */
     public static function getModelsForProvider(string $provider): array
     {
-        // Lists curated 2026-06. When a provider deprecates a model that is
-        // still configured by a client, the admin UI re-injects the stored
-        // value via the "Other / Custom" entry — the saved config is never
-        // lost (see ai_setup.php's dalfredPopulateModelSelect()).
+        // Lists curated 2026-07 (every ID verified against the provider's
+        // live /models endpoint + a chat ping via tools/check_models.php).
+        // When a provider deprecates a model that is still configured by a
+        // client, the admin UI re-injects the stored value via the
+        // "Other / Custom" entry — the saved config is never lost (see
+        // ai_setup.php's dalfredPopulateModelSelect()).
         // Sibling migration in DalfredMigrations remaps a small set of known-
         // dead defaults (e.g. gemini-2.0-flash → 2.5-flash) so customers who
         // never touched the model setting are upgraded silently.
         switch ($provider) {
             case 'anthropic':
-                // Source : skill claude-api (catalogue Anthropic, juin 2026).
+                // Source: Anthropic Models API GET /v1/models (2026-07-14).
+                // Keep every model currently returned for this API key; use
+                // pinned IDs for pre-4.6 generations, as documented by Anthropic.
                 return [
                     'claude-opus-4-8' => 'Claude Opus 4.8 (Recommended)',
+                    'claude-fable-5' => 'Claude Fable 5 (Most capable)',
+                    'claude-sonnet-5' => 'Claude Sonnet 5 (Balanced)',
+                    'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
                     'claude-opus-4-7' => 'Claude Opus 4.7',
-                    'claude-sonnet-4-6' => 'Claude Sonnet 4.6 (Balanced)',
-                    'claude-haiku-4-5' => 'Claude Haiku 4.5 (Fast)',
+                    'claude-opus-4-6' => 'Claude Opus 4.6',
+                    'claude-opus-4-5-20251101' => 'Claude Opus 4.5',
+                    'claude-haiku-4-5-20251001' => 'Claude Haiku 4.5 (Fast)',
+                    'claude-sonnet-4-5-20250929' => 'Claude Sonnet 4.5',
+                    'claude-opus-4-1-20250805' => 'Claude Opus 4.1',
                 ];
             case 'openai':
-                // Source : developers.openai.com/api/docs/models (juin 2026).
+                // Source : developers.openai.com/api/docs/models + GET
+                // /v1/models (juillet 2026). Famille GPT-5.6 (lancée le
+                // 2026-07-09) : seul Sol (flagship) est listé. gpt-5.6-terra
+                // renvoie systématiquement "insufficient permissions" sur clé
+                // standard (réservé aux orgs vérifiées) et gpt-5.6-luna 401
+                // par intermittence pendant le rollout (constaté 2026-07-14,
+                // ~2 échecs sur 5) — tous deux restent saisissables via
+                // "Other / Custom" ; à relister quand check_models passe.
                 return [
-                    'gpt-5.5' => 'GPT-5.5 (Recommended)',
+                    'gpt-5.6-sol' => 'GPT-5.6 Sol (Recommended)',
+                    'gpt-5.5' => 'GPT-5.5',
                     'gpt-5.4' => 'GPT-5.4',
                     'gpt-5.4-mini' => 'GPT-5.4 Mini (Fast)',
                     'gpt-5' => 'GPT-5',
@@ -517,21 +535,33 @@ class ConfigService
                     'gpt-4o' => 'GPT-4o',
                 ];
             case 'mistral':
-                // Source : docs.mistral.ai (alias *-latest, juin 2026).
+                // Source: Mistral Models API GET /v1/models (2026-07-14).
+                // Only chat-completion models with function calling and no
+                // deprecation timestamp are listed. Dated snapshots are omitted
+                // in favour of their maintained *-latest aliases.
                 return [
-                    'mistral-large-latest' => 'Mistral Large (Recommended)',
-                    'mistral-medium-latest' => 'Mistral Medium',
-                    'mistral-small-latest' => 'Mistral Small (Fast)',
-                    'magistral-medium-latest' => 'Magistral Medium (Reasoning)',
+                    'mistral-medium-latest' => 'Mistral Medium 3.5 (Recommended)',
+                    'mistral-small-latest' => 'Mistral Small 4 (Fast + Reasoning)',
+                    'mistral-large-latest' => 'Mistral Large 3',
+                    'ministral-14b-latest' => 'Ministral 3 14B',
+                    'ministral-8b-latest' => 'Ministral 3 8B',
+                    'ministral-3b-latest' => 'Ministral 3 3B (Fastest)',
+                    'magistral-small-latest' => 'Magistral Small (Reasoning)',
                     'codestral-latest' => 'Codestral (Code)',
                 ];
             case 'gemini':
-                // Source : ai.google.dev/gemini-api/docs/models (juin 2026).
+                // Source: Google Gemini model catalogue + GET /v1beta/models
+                // (2026-07-14). Keep the current general-purpose stable/preview
+                // models that support generateContent; exclude media, Live,
+                // agent-only and models listed by Google as previous/shut down.
                 return [
                     'gemini-3.5-flash' => 'Gemini 3.5 Flash (Recommended)',
-                    'gemini-3.1-pro-preview' => 'Gemini 3.1 Pro',
+                    'gemini-3.1-pro-preview' => 'Gemini 3.1 Pro (Preview)',
                     'gemini-3.1-flash-lite' => 'Gemini 3.1 Flash-Lite (Fastest)',
+                    'gemini-3-flash-preview' => 'Gemini 3 Flash (Preview)',
+                    'gemini-2.5-pro' => 'Gemini 2.5 Pro',
                     'gemini-2.5-flash' => 'Gemini 2.5 Flash',
+                    'gemini-2.5-flash-lite' => 'Gemini 2.5 Flash-Lite',
                 ];
             case 'ollama':
                 return []; // Free text input

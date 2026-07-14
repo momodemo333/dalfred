@@ -30,10 +30,12 @@ assertTrue(ProviderCapabilities::supportsImages('openai', 'gpt-4-turbo'), 'opena
 assertTrue(ProviderCapabilities::supportsImages('openai', 'gpt-4-vision-preview'), 'openai / gpt-4-vision');
 assertTrue(!ProviderCapabilities::supportsImages('openai', 'gpt-3.5-turbo'), 'openai / gpt-3.5 (no vision)');
 
-echo "\n=== Mistral: only pixtral and recent medium ===\n";
+echo "\n=== Mistral: current multimodal chat families ===\n";
 assertTrue(ProviderCapabilities::supportsImages('mistral', 'pixtral-12b'), 'mistral / pixtral');
-assertTrue(!ProviderCapabilities::supportsImages('mistral', 'mistral-tiny'), 'mistral / tiny (text only)');
-assertTrue(!ProviderCapabilities::supportsImages('mistral', 'mistral-small'), 'mistral / small (text only)');
+assertTrue(ProviderCapabilities::supportsImages('mistral', 'mistral-medium-latest'), 'mistral / medium');
+assertTrue(ProviderCapabilities::supportsImages('mistral', 'mistral-small-latest'), 'mistral / small 4');
+assertTrue(ProviderCapabilities::supportsImages('mistral', 'ministral-14b-latest'), 'mistral / ministral 14B');
+assertTrue(!ProviderCapabilities::supportsImages('mistral', 'codestral-latest'), 'mistral / codestral (text only)');
 
 echo "\n=== Ollama: vision-capable model names ===\n";
 assertTrue(ProviderCapabilities::supportsImages('ollama', 'llava:13b'), 'ollama / llava');
