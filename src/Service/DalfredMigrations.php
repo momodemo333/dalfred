@@ -622,6 +622,33 @@ class DalfredMigrations
                 'context_window' => 'INT',
                 'date_creation' => 'DATETIME',
             ],
+            'dalfred_oauth_client' => [
+                'rowid' => 'INT',
+                'client_id' => 'VARCHAR',
+                'client_secret_hash' => 'VARCHAR',
+                'client_name' => 'VARCHAR',
+                'redirect_uris' => 'TEXT',
+                'token_endpoint_auth_method' => 'VARCHAR',
+                'entity' => 'INT',
+                'datec' => 'DATETIME',
+                'tms' => 'TIMESTAMP',
+            ],
+            'dalfred_oauth_token' => [
+                'rowid' => 'INT',
+                'token_type' => 'VARCHAR',
+                'token_hash' => 'VARCHAR',
+                'fk_client' => 'INT',
+                'fk_user' => 'INT',
+                'scope' => 'VARCHAR',
+                'resource' => 'VARCHAR',
+                'code_challenge' => 'VARCHAR',
+                'redirect_uri' => 'TEXT',
+                'expires_at' => 'DATETIME',
+                'revoked' => 'TINYINT',
+                'entity' => 'INT',
+                'datec' => 'DATETIME',
+                'tms' => 'TIMESTAMP',
+            ],
         ];
     }
 }

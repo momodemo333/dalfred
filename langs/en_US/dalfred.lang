@@ -498,7 +498,7 @@ MySQLSchemaEnableDesc=Allows the agent to explore your database structure (table
 DalfredToolPayloadMaxTokens=Tool payload truncation threshold (tokens)
 DalfredToolPayloadMaxTokensHelp=Above this threshold, large tool inputs and results are replaced by a placeholder in the chat history to save LLM context. Default: 2000. Set to 0 to disable.
 
-# === External MCP access (2.25.0) ===
+# === External MCP access (2.27.0) ===
 DalfredMcpExternalTab=External MCP access
 DalfredMcpExternalTitle=External MCP access
 DalfredMcpExternalIntro=Expose this Dolibarr as a remote MCP (Model Context Protocol) server over HTTP. Connect Claude, Claude Code or any MCP-compatible AI agent to your ERP: browse and manage third parties, invoices, products, orders, projects, documents… with the permissions of the authenticated user.

@@ -498,7 +498,7 @@ MySQLSchemaEnableDesc=Autorise l'agent à explorer la structure de votre base de
 DalfredToolPayloadMaxTokens=Seuil de troncature des payloads d'outils (tokens)
 DalfredToolPayloadMaxTokensHelp=Au-delà de ce seuil, les inputs et résultats volumineux des appels d'outils sont remplacés par un placeholder dans l'historique pour économiser le contexte LLM. Défaut : 2000. Valeur 0 = désactivé.
 
-# === External MCP access (2.25.0) ===
+# === External MCP access (2.27.0) ===
 DalfredMcpExternalTab=Accès MCP externe
 DalfredMcpExternalTitle=Accès MCP externe
 DalfredMcpExternalIntro=Exposez ce Dolibarr comme serveur MCP (Model Context Protocol) distant via HTTP. Connectez Claude, Claude Code ou tout agent IA compatible MCP à votre ERP : consultation et gestion des tiers, factures, produits, commandes, projets, documents… avec les permissions de l'utilisateur authentifié.
