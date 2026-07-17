@@ -497,3 +497,39 @@ MySQLSchemaEnableDesc=Allows the agent to explore your database structure (table
 # Tool payload truncation (v2.24.0)
 DalfredToolPayloadMaxTokens=Tool payload truncation threshold (tokens)
 DalfredToolPayloadMaxTokensHelp=Above this threshold, large tool inputs and results are replaced by a placeholder in the chat history to save LLM context. Default: 2000. Set to 0 to disable.
+
+# === External MCP access (2.27.0) ===
+DalfredMcpExternalTab=External MCP access
+DalfredMcpExternalTitle=External MCP access
+DalfredMcpExternalIntro=Expose this Dolibarr as a remote MCP (Model Context Protocol) server over HTTP. Connect Claude, Claude Code or any MCP-compatible AI agent to your ERP: browse and manage third parties, invoices, products, orders, projects, documents… with the permissions of the authenticated user.
+DalfredMcpEnableExternal=Enable external MCP access
+DalfredMcpExternalDisabledNote=External MCP access is disabled. Enable the toggle above to expose the MCP endpoint and see connection details.
+DalfredMcpEndpoint=MCP endpoint URL
+DalfredMcpTransport=Transport
+DalfredMcpAuthMethods=Authentication methods
+DalfredMcpAuthMethodsValue=Dolibarr API key (Bearer / DOLAPIKEY) or OAuth 2.1 (claude.ai connectors)
+DalfredMcpOAuthMetadata=OAuth metadata (authorization server)
+DalfredMcpServerPackage=MCP server package
+DalfredMcpServerPackageOk=Present
+DalfredMcpServerPackageMissing=Not found — reinstall the module (the package must be bundled under vendor/)
+DalfredMcpRestApiModule=REST API module (required)
+DalfredMcpRestApiMissing=Disabled — enable Dolibarr's "REST API" module
+DalfredMcpClientExamples=Connect a client
+DalfredMcpRecommended=Recommended
+DalfredMcpClientClaudeAi=Claude.ai (custom connector)
+DalfredMcpConnectorOAuthHelp=In claude.ai: Settings → Connectors → "Add custom connector", then enter the URL below. Claude automatically discovers OAuth authentication, signs you in with your Dolibarr account and asks for your consent — no key to copy.
+DalfredMcpConnectorUrlLabel=Connector URL
+DalfredMcpClientClaudeCode=Claude Code
+DalfredMcpAuthNote=API key authentication: "Authorization: Bearer <API key>" header (recommended) or "DOLAPIKEY: <API key>" header.
+DalfredMcpCommandLabel=Command
+DalfredMcpYourApiKey=YOUR_API_KEY
+DalfredMcpClientJson=Generic MCP client (mcp.json)
+DalfredMcpApiKeyHelp=A user's API key is generated on their card: Users & Groups → user card → "API key" tab. The user must have the permissions matching the expected actions, since the agent acts with their rights.
+
+# OAuth consent screen
+DalfredOAuthConsentTitle=Authorize access to Dolibarr
+DalfredOAuthConsentIntro=The application %s is requesting permission to access your Dolibarr with your account %s.
+DalfredOAuthConsentScope1=Read and manage the data your account has access to (third parties, invoices, products, documents…)
+DalfredOAuthConsentScope2=Act through the REST API with your Dolibarr permissions — nothing more than what you can already do
+DalfredOAuthAccept=Authorize
+DalfredOAuthDeny=Deny

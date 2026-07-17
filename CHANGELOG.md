@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.27.0] - 2026-07-16
+
+### Added
+- **Optional external MCP access.** Dalfred can now expose its Dolibarr MCP
+  server as a remote Streamable HTTP endpoint with OAuth 2.1 (claude.ai
+  connectors, Claude Code, any HTTP MCP client), in addition to the built-in
+  chat. **Disabled by default** — enable it from the new admin tab
+  *"Accès externe MCP"* (toggle `DALFRED_MCP_EXTERNAL_ENABLED`). While
+  disabled, the endpoint returns HTTP 403. Uses the shared
+  `dolibarr-mcp-oauth` library (same OAuth 2.1 / PKCE S256 / sha256-hashed
+  tokens as the emMCP module); OAuth data lives in the new
+  `llx_dalfred_oauth_*` tables. Requires the Dolibarr REST **API** module.
+
 ## [2.26.1] - 2026-07-14
 
 ### Changed

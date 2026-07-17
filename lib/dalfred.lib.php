@@ -76,6 +76,12 @@ function dalfred_admin_prepare_head()
     $head[$h][2] = 'diagnostic';
     $h++;
 
+    // External MCP access tab
+    $head[$h][0] = dol_buildpath('/dalfred/admin/mcp_external.php', 1);
+    $head[$h][1] = $langs->trans("DalfredMcpExternalTab");
+    $head[$h][2] = 'mcpexternal';
+    $h++;
+
     // About tab
     $head[$h][0] = dol_buildpath('/dalfred/admin/about.php', 1);
     $head[$h][1] = $langs->trans("About");

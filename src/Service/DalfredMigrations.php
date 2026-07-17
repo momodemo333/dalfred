@@ -17,7 +17,7 @@ namespace Dalfred\Service;
 class DalfredMigrations
 {
     /** Current module version — must match modDalfred::$version */
-    public const MODULE_VERSION = '2.26.1';
+    public const MODULE_VERSION = '2.27.0';
 
     /**
      * Models that have been deprecated by their provider and must be remapped
@@ -521,6 +521,53 @@ class DalfredMigrations
             return $a || $b || $c || $d;
         });
 
+        // === v2.27.0: External MCP access — OAuth 2.1 tables ===
+        // Creates llx_dalfred_oauth_client and llx_dalfred_oauth_token for the
+        // optional external MCP endpoint (Streamable HTTP + OAuth 2.1), reusing
+        // the shared dolibarr-mcp-oauth library. `_load_tables` covers fresh
+        // installs via the sql/ files; this callback covers file-upgrade
+        // customers whose init() never re-runs. Idempotent: CREATE TABLE IF
+        // NOT EXISTS + addIndexIfMissing for each index.
+        $helper->addCallbackMigration('2.27.0', function (\DoliDB $db) use ($helper): bool {
+            $clientSql = "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "dalfred_oauth_client ("
+                . "rowid integer AUTO_INCREMENT PRIMARY KEY,"
+                . "client_id varchar(80) NOT NULL,"
+                . "client_secret_hash varchar(128) NULL,"
+                . "client_name varchar(255) NULL,"
+                . "redirect_uris text NOT NULL,"
+                . "token_endpoint_auth_method varchar(32) DEFAULT 'none',"
+                . "entity integer DEFAULT 1 NOT NULL,"
+                . "datec datetime NOT NULL,"
+                . "tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+                . ") ENGINE=innodb";
+            $c = (bool) $db->query($clientSql);
+
+            $tokenSql = "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "dalfred_oauth_token ("
+                . "rowid integer AUTO_INCREMENT PRIMARY KEY,"
+                . "token_type varchar(8) NOT NULL,"
+                . "token_hash varchar(64) NOT NULL,"
+                . "fk_client integer NOT NULL,"
+                . "fk_user integer NOT NULL,"
+                . "scope varchar(255) NULL,"
+                . "resource varchar(255) NULL,"
+                . "code_challenge varchar(128) NULL,"
+                . "redirect_uri text NULL,"
+                . "expires_at datetime NOT NULL,"
+                . "revoked tinyint DEFAULT 0 NOT NULL,"
+                . "entity integer DEFAULT 1 NOT NULL,"
+                . "datec datetime NOT NULL,"
+                . "tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+                . ") ENGINE=innodb";
+            $t = (bool) $db->query($tokenSql);
+
+            $i1 = $helper->addIndexIfMissing('dalfred_oauth_client', 'uk_dalfred_oauth_client_id', 'client_id');
+            $i2 = $helper->addIndexIfMissing('dalfred_oauth_token', 'uk_dalfred_oauth_token_hash', 'token_hash');
+            $i3 = $helper->addIndexIfMissing('dalfred_oauth_token', 'idx_dalfred_oauth_token_user', 'fk_user');
+            $i4 = $helper->addIndexIfMissing('dalfred_oauth_token', 'idx_dalfred_oauth_token_expires', 'expires_at');
+
+            return $c || $t || $i1 || $i2 || $i3 || $i4;
+        });
+
         return $helper;
     }
 
@@ -574,6 +621,33 @@ class DalfredMigrations
                 'tool_calls_count' => 'SMALLINT',
                 'context_window' => 'INT',
                 'date_creation' => 'DATETIME',
+            ],
+            'dalfred_oauth_client' => [
+                'rowid' => 'INT',
+                'client_id' => 'VARCHAR',
+                'client_secret_hash' => 'VARCHAR',
+                'client_name' => 'VARCHAR',
+                'redirect_uris' => 'TEXT',
+                'token_endpoint_auth_method' => 'VARCHAR',
+                'entity' => 'INT',
+                'datec' => 'DATETIME',
+                'tms' => 'TIMESTAMP',
+            ],
+            'dalfred_oauth_token' => [
+                'rowid' => 'INT',
+                'token_type' => 'VARCHAR',
+                'token_hash' => 'VARCHAR',
+                'fk_client' => 'INT',
+                'fk_user' => 'INT',
+                'scope' => 'VARCHAR',
+                'resource' => 'VARCHAR',
+                'code_challenge' => 'VARCHAR',
+                'redirect_uri' => 'TEXT',
+                'expires_at' => 'DATETIME',
+                'revoked' => 'TINYINT',
+                'entity' => 'INT',
+                'datec' => 'DATETIME',
+                'tms' => 'TIMESTAMP',
             ],
         ];
     }
