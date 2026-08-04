@@ -52,11 +52,13 @@ img.dalfred-agent-logo.dalfred-icon-lg {
 
 /* Brand icon for the top-right login_block entry. Uses the uploaded brand
    logo as a background-image when present, otherwise wraps the Lucide bot
-   SVG fallback rendered server-side. */
+   SVG fallback rendered server-side. Sized to match the neighboring
+   Font Awesome toolbar icons (~15-16px glyphs; the Lucide grid has more
+   internal padding so 18px is the optical equivalent). */
 .dalfred-brand-icon {
     display: inline-block;
-    width: 2.2em;
-    height: 2.2em;
+    width: 18px;
+    height: 18px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

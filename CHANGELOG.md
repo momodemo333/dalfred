@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.27.1] - 2026-08-04
+
+### Fixed
+- **Top bar robot icon size.** The Dalfred icon in the top-right toolbar
+  (widget toggle, next to the fullscreen chat icon) was noticeably larger
+  than the neighboring Dolibarr icons (print, help…). It is now sized to
+  visually match them. Also applies to a custom brand logo when one is
+  uploaded.
+
 ## [2.27.0] - 2026-07-16
 
 ### Added
