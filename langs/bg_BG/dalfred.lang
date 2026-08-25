@@ -535,3 +535,6 @@ AttachExpired = изтекъл
 AttachUnsupported = неподдържан тип файл
 Copied = Копирано
 CopyFailed = Копирането е неуспешно
+
+# --- MCP SQL access ---
+DalfredSqlAccessTab = MCP SQL достъп

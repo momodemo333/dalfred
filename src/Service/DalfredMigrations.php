@@ -17,7 +17,7 @@ namespace Dalfred\Service;
 class DalfredMigrations
 {
     /** Current module version — must match modDalfred::$version */
-    public const MODULE_VERSION = '2.28.0';
+    public const MODULE_VERSION = '2.29.0';
 
     /**
      * Models that have been deprecated by their provider and must be remapped
@@ -568,6 +568,56 @@ class DalfredMigrations
             return $c || $t || $i1 || $i2 || $i3 || $i4;
         });
 
+        // === v2.29.0: read-only SQL access over MCP ===
+        // Two tables, mirroring emMCP's: a per-user opt-in where a missing row
+        // means "refused", and an audit trail. Both are created here rather
+        // than left to init(), which only ever runs when the module is enabled
+        // — an existing installation upgrading by file copy would otherwise
+        // reach the new admin tab with no tables behind it.
+        $helper->addCallbackMigration('2.29.0', function (\DoliDB $db) use ($helper): bool {
+            $permSql = "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "dalfred_sql_permissions ("
+                . "rowid integer AUTO_INCREMENT PRIMARY KEY,"
+                . "entity integer DEFAULT 1 NOT NULL,"
+                . "fk_user integer NOT NULL,"
+                . "sql_enabled tinyint DEFAULT 0 NOT NULL,"
+                . "date_creation datetime NOT NULL,"
+                . "date_modification datetime NULL,"
+                . "fk_user_creat integer NULL,"
+                . "fk_user_modif integer NULL"
+                . ") ENGINE=innodb";
+            $p = (bool) $db->query($permSql);
+
+            $auditSql = "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "dalfred_sql_audit ("
+                . "rowid integer AUTO_INCREMENT PRIMARY KEY,"
+                . "entity integer DEFAULT 1 NOT NULL,"
+                . "fk_user integer NOT NULL,"
+                . "date_creation datetime NOT NULL,"
+                . "sql_hash varchar(64) NOT NULL,"
+                . "sql_text text NULL,"
+                . "duration_ms integer DEFAULT 0 NOT NULL,"
+                . "row_count integer DEFAULT 0 NOT NULL,"
+                . "bytes integer DEFAULT 0 NOT NULL,"
+                . "success tinyint DEFAULT 0 NOT NULL,"
+                . "error_code varchar(64) NULL,"
+                . "source varchar(16) DEFAULT 'mcp' NOT NULL,"
+                . "operation varchar(16) DEFAULT 'query' NOT NULL"
+                . ") ENGINE=innodb";
+            $a = (bool) $db->query($auditSql);
+
+            $i1 = $helper->addIndexIfMissing('dalfred_sql_permissions', 'idx_dalfred_sql_perm_user', 'fk_user');
+            $i2 = $helper->addIndexIfMissing('dalfred_sql_audit', 'idx_dalfred_sql_audit_user', 'fk_user');
+            $i3 = $helper->addIndexIfMissing('dalfred_sql_audit', 'idx_dalfred_sql_audit_date', 'date_creation');
+
+            // Rights are written by init() through insert_permissions(), and
+            // init() is not replayed on a files-only upgrade. Without this, the
+            // sqlquery right introduced here would never exist on an existing
+            // install: the admin page would offer to grant a right nobody can
+            // hold, and every SQL call would be refused with no visible cause.
+            $r = self::registerSqlQueryRight($db);
+
+            return $p || $a || $i1 || $i2 || $i3 || $r;
+        });
+
         return $helper;
     }
 
@@ -650,5 +700,44 @@ class DalfredMigrations
                 'tms' => 'TIMESTAMP',
             ],
         ];
+    }
+
+    /**
+     * Register the sqlquery right when it is missing from the database.
+     *
+     * insert_permissions() is called with $reinitadminperms = 0 on purpose.
+     * Passing 1 — as DolibarrModules::_init() does — re-grants every module
+     * right to every admin, silently undoing revocations a customer made.
+     * It returns an ERROR COUNT, not a success flag: 0 means it worked.
+     */
+    private static function registerSqlQueryRight(\DoliDB $db): bool
+    {
+        $sql = "SELECT COUNT(*) as n FROM " . MAIN_DB_PREFIX . "rights_def"
+            . " WHERE module = 'dalfred' AND perms = 'sqlquery'";
+        $resql = $db->query($sql);
+        if ($resql) {
+            $obj = $db->fetch_object($resql);
+            if ($obj && (int) $obj->n > 0) {
+                return false;
+            }
+        }
+
+        dol_include_once('/dalfred/core/modules/modDalfred.class.php');
+        if (!class_exists('modDalfred')) {
+            dol_syslog('[DALFRED] modDalfred descriptor not found; cannot register sqlquery right', LOG_ERR);
+
+            return false;
+        }
+
+        $module = new \modDalfred($db);
+        if ($module->insert_permissions(0) > 0) {
+            dol_syslog('[DALFRED] Could not register the sqlquery right', LOG_ERR);
+
+            return false;
+        }
+
+        dol_syslog('[DALFRED] Registered missing module right (sqlquery)', LOG_INFO);
+
+        return true;
     }
 }

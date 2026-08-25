@@ -141,6 +141,86 @@ if (!$autoload) {
 }
 require_once $autoload;
 
+/**
+ * Build the read-only SQL capability, or null when the caller may not use it.
+ *
+ * Returning null is not a soft failure: the MCP runtime then excludes the SQL
+ * tools from attribute discovery entirely, so they never appear in tools/list.
+ * Deny-by-default is structural rather than a runtime check to remember.
+ *
+ * Must be called only after the dolibarr-mcp-server autoloader is required —
+ * DolibarrMcpSql\SqlCapability implements one of that package's interfaces.
+ *
+ * @param  DoliDB $db     Database handler
+ * @param  Conf   $conf   Dolibarr configuration
+ * @param  string $apiKey Caller's validated API key
+ * @return \DolibarrMcpSql\SqlCapability|null
+ */
+function dalfredBuildSqlCapability($db, $conf, $apiKey)
+{
+	dol_include_once('/dalfred/lib/dalfred_mcp_bootstrap.php');
+	if (dalfred_mcp_sql_autoload() === null) {
+		dol_syslog('[DALFRED] dolibarr-mcp-sql library not found; SQL tools stay hidden', LOG_WARNING);
+
+		return null;
+	}
+
+	$config = dalfred_sql_config();
+	$permissions = new \DolibarrMcpSql\SqlPermissions($db, $conf, $config);
+
+	// Cheapest gate first: skip loading a User object on the overwhelmingly
+	// common path where the feature is simply off.
+	if (!$permissions->isGloballyEnabled()) {
+		return null;
+	}
+
+	$userId = dalfredResolveUserIdFromApiKey($db, $apiKey);
+	if ($userId <= 0) {
+		return null;
+	}
+
+	$mcpUser = new User($db);
+	if ($mcpUser->fetch($userId) <= 0) {
+		return null;
+	}
+	$mcpUser->getrights();
+
+	$denial = $permissions->denialCode($mcpUser);
+	if ($denial !== null) {
+		dol_syslog('[DALFRED] SQL access refused for user '.((int) $userId).': '.$denial, LOG_INFO);
+
+		return null;
+	}
+
+	return new \DolibarrMcpSql\SqlCapability($db, $conf, $mcpUser, $config, 'mcp');
+}
+
+/**
+ * Resolve the Dolibarr user behind an API key.
+ *
+ * Keys are stored either in clear or encrypted depending on the instance, so
+ * both forms are matched. More than one hit is treated as no hit: an ambiguous
+ * key must not pick a user.
+ *
+ * @param  DoliDB $db     Database handler
+ * @param  string $apiKey Caller's API key
+ * @return int            User id, or 0 when it resolves to nothing usable
+ */
+function dalfredResolveUserIdFromApiKey($db, $apiKey)
+{
+	$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."user";
+	$sql .= " WHERE api_key = '".$db->escape($apiKey)."'";
+	$sql .= " OR api_key = '".$db->escape(dolEncrypt($apiKey, '', '', 'dolibarr'))."'";
+
+	$resql = $db->query($sql);
+	if (!$resql || $db->num_rows($resql) !== 1) {
+		return 0;
+	}
+	$obj = $db->fetch_object($resql);
+
+	return $obj ? (int) $obj->rowid : 0;
+}
+
 // --- Handle the MCP request ------------------------------------------------
 
 // The MCP tools act through the local Dolibarr REST API with the caller's key.
@@ -152,7 +232,9 @@ $config = new DolibarrMcp\Config\ConnectionConfig(DOL_MAIN_URL_ROOT, $apiKey);
 $sessionDir = DOL_DATA_ROOT.'/dalfred/mcp_sessions';
 
 try {
-	$response = DolibarrMcp\Bootstrap::handleHttpRequest(null, $sessionDir, $config);
+	// A null capability keeps the SQL tools out of discovery entirely.
+	$sqlCapability = dalfredBuildSqlCapability($db, $conf, $apiKey);
+	$response = DolibarrMcp\Bootstrap::handleHttpRequest(null, $sessionDir, $config, $sqlCapability);
 	DolibarrMcp\Bootstrap::emit($response);
 } catch (Throwable $e) {
 	dol_syslog('[DALFRED] ERROR '.$e->getMessage(), LOG_ERR);

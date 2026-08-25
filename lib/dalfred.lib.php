@@ -82,6 +82,14 @@ function dalfred_admin_prepare_head()
     $head[$h][2] = 'mcpexternal';
     $h++;
 
+    // MCP SQL access tab. Named "MCP SQL access", never just "SQL access":
+    // Dalfred also has SQL tools inside the chat, and an admin must be able to
+    // tell at a glance that this page governs the MCP surface only.
+    $head[$h][0] = dol_buildpath('/dalfred/admin/sql_access.php', 1);
+    $head[$h][1] = $langs->trans("DalfredSqlAccessTab");
+    $head[$h][2] = 'sqlaccess';
+    $h++;
+
     // About tab
     $head[$h][0] = dol_buildpath('/dalfred/admin/about.php', 1);
     $head[$h][1] = $langs->trans("About");

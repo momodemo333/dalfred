@@ -1,5 +1,45 @@
 # Changelog
 
+## [2.29.0] - 2026-08-25
+
+### Added
+- **Read-only SQL access over MCP.** An external MCP client (claude.ai, Claude
+  Code, any HTTP MCP client) can now query the Dolibarr database directly for
+  reporting, through two tools: `dolibarr_sql_query` and `dolibarr_sql_schema`.
+  The feature already existed in emMCP; Dalfred now offers exactly the same one,
+  from the same shared code, so a customer running both modules gets the same
+  behaviour either way.
+- **New admin tab, "MCP SQL access."** Named that way on purpose: it governs
+  *only* the SQL exposed through the external MCP endpoint. The SQL tools the
+  agent uses inside the chat are configured in "Toolkit permissions" and are
+  unaffected — the tab says so at the top.
+- **Disabled by default, behind four independent conditions**, each of which
+  refuses on its own: the global switch, the new Dolibarr right
+  `dalfred->sqlquery->read` (granted to nobody by default, admins included), a
+  per-user opt-in, and a multi-company guard. While any one of them is missing,
+  the SQL tools are not merely blocked — they never appear in `tools/list` at
+  all, because the MCP runtime excludes them from discovery.
+- **Configurable limits**: maximum rows returned, statement timeout, maximum
+  response size, and an audit trail that can be reduced to query hashes when
+  the query text itself is too sensitive to store.
+- **Audit trail** of every attempt, allowed or refused, in the new admin tab.
+  Query *results* are never recorded.
+
+### Security
+- Only read statements are accepted, and the check is not a keyword scan: a
+  lexer first refuses multi-statement text and executable comments, then a real
+  SQL parser must produce a tree whose clauses all belong to a whitelist, then
+  a policy is applied to every table, column and function in it. Consequences:
+  UNION, CTEs, nested subqueries, joins and aggregates all work, while a write
+  keyword sitting inside a string literal — `WHERE label = 'update stock'` — is
+  correctly read as data and not as a statement.
+- Credential columns (`password`, `api_key`, `token`, `secret`, …) are refused
+  wherever they appear, whatever the alias, as are `information_schema`,
+  `mysql`, and the modules' own token, audit and permission tables.
+- Queries run on the Dolibarr credentials but on a **separate mysqli session**,
+  with a mandatory statement timeout, a pinned SQL mode and a READ ONLY
+  transaction, so none of that leaks into the application connection.
+
 ## [2.28.0] - 2026-08-25
 
 ### Fixed

@@ -33,6 +33,7 @@ node_modules/
 /dist/
 dolibarr-mcp-server/
 dolibarr-mcp-oauth/
+dolibarr-mcp-sql/
 docs/DOLISTORE-COMPLIANCE.md
 docs/DOLISTORE_LISTING.md
 # marketing/ contains the production-ready marketing package

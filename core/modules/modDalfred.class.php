@@ -59,7 +59,7 @@ class modDalfred extends DolibarrModules
         $this->descriptionlong = "Dalfred is an intelligent AI assistant that helps users interact with their Dolibarr ERP/CRM system using natural language. It uses Claude AI and MCP (Model Context Protocol) to execute actions.";
 
         // Version
-        $this->version = '2.28.0';
+        $this->version = '2.29.0';
         $this->url_last_version = 'https://www.e-dem.com/dolibarr/dalfred/last_version.php';
 
         // Const name for module status
@@ -257,6 +257,17 @@ class modDalfred extends DolibarrModules
         $this->rights[$r][1] = 'Use Smart Queries (saved SQL queries)';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'smartquery';
+        $r++;
+
+        // Permission to run read-only SQL through the external MCP endpoint.
+        // Default 0 — granted to nobody, admins included: this is one of the
+        // four conditions that must all hold before the SQL tools are even
+        // discoverable. See admin/sql_access.php.
+        $this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // 49140806
+        $this->rights[$r][1] = 'Run read-only SQL queries through MCP';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'sqlquery';
+        $this->rights[$r][5] = 'read';
         $r++;
 
         // Main menu entries
