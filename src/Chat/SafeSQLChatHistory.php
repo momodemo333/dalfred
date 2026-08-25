@@ -7,12 +7,14 @@ namespace Dalfred\Chat;
 use Dalfred\Chat\ContentBlocks\AttachmentMetaContent;
 use Dalfred\Chat\ToolPayloadTruncator;
 use NeuronAI\Chat\Enums\MessageRole;
+use NeuronAI\Chat\History\ChatHistoryInterface;
 use NeuronAI\Chat\History\SQLChatHistory;
 use NeuronAI\Chat\Messages\AssistantMessage;
 use NeuronAI\Chat\Messages\ContentBlocks\ContentBlockInterface;
 use NeuronAI\Chat\Messages\Message;
 use NeuronAI\Chat\Messages\ToolCallMessage;
 use NeuronAI\Chat\Messages\ToolResultMessage;
+use NeuronAI\Exceptions\ChatHistoryException;
 
 /**
  * Extended SQLChatHistory that sanitizes a persisted history on load so it
@@ -60,18 +62,36 @@ use NeuronAI\Chat\Messages\ToolResultMessage;
  */
 class SafeSQLChatHistory extends SQLChatHistory
 {
+    /** Fallback texts, in English, used when the caller injects no translation. */
+    public const DEFAULT_LOST_ANSWER_TEXT = '[Previous answer lost — a technical error interrupted the processing of your previous message.]';
+    public const DEFAULT_LOST_QUESTION_TEXT = '[Missing user message restored to preserve the conversation alternation.]';
+
     private ToolPayloadTruncator $truncator;
+
+    /**
+     * Placeholder texts are injected rather than translated here: this class is
+     * namespaced service code and must not reach for Dolibarr globals. The
+     * caller resolves them with $langs so the user reads them in their own
+     * language — see actions_dalfred / the chat endpoints.
+     */
+    private string $lostAnswerText;
+
+    private string $lostQuestionText;
 
     public function __construct(
         string $thread_id,
         \PDO $pdo,
         string $table = 'chat_history',
         int $contextWindow = 50000,
-        ?ToolPayloadTruncator $truncator = null
+        ?ToolPayloadTruncator $truncator = null,
+        ?string $lostAnswerText = null,
+        ?string $lostQuestionText = null
     ) {
         // Initialize before parent::__construct() because the parent calls load(),
         // which may call setMessages() (our override) for history repairs.
         $this->truncator = $truncator ?? new ToolPayloadTruncator(8000);
+        $this->lostAnswerText = $lostAnswerText ?? self::DEFAULT_LOST_ANSWER_TEXT;
+        $this->lostQuestionText = $lostQuestionText ?? self::DEFAULT_LOST_QUESTION_TEXT;
         parent::__construct($thread_id, $pdo, $table, $contextWindow);
     }
 
@@ -106,28 +126,9 @@ class SafeSQLChatHistory extends SQLChatHistory
             }
         }
 
-        // Second pass: repair broken user/assistant alternation by inserting a
-        // synthetic AssistantMessage placeholder between consecutive same-role
-        // regular messages. ToolCallMessage / ToolResultMessage pairs are
-        // already validated by the first pass and are skipped here because
-        // they have their own alternation rules in the v3 trimmer.
+        // Second pass: rebuild a history that satisfies the v3 trimmer's
+        // alternation rules — including the turn left open at the tail.
         $finalHistory = $this->repairAlternation($cleaned, $changed);
-
-        // Third pass: drop a trailing orphan USER message left by a failed
-        // inference. NeuronAI's AbstractChatHistory::addMessage() persists the
-        // user message to DB *before* running inference; if inference then fails
-        // (invalid API key, network error, provider 4xx, ...) no AssistantMessage
-        // is ever saved and the thread is left ending on an unanswered user
-        // message. On the next chat() call, load() rehydrates [user] and NeuronAI
-        // appends the current user message → [user, user] → the v3 trimmer throws
-        // "expected role assistant, got user" and the thread is bricked forever.
-        // repairAlternation() cannot catch this because at load() time the history
-        // holds a single, legitimately-valid user message; the duplicate only
-        // appears after the current message is appended downstream. Dropping the
-        // orphan here (load() runs in the SQLChatHistory constructor, i.e. on
-        // every chat request) purges last turn's orphan before the new user
-        // message is added, and heals already-corrupted threads in place.
-        $finalHistory = $this->dropTrailingOrphanUser($finalHistory, $changed);
 
         if ($changed) {
             $this->history = $finalHistory;
@@ -136,68 +137,34 @@ class SafeSQLChatHistory extends SQLChatHistory
     }
 
     /**
-     * Drop a trailing USER message left orphan by a failed inference.
+     * Rebuild a history that satisfies HistoryTrimmer::validateAlternation().
      *
-     * We remove the orphan rather than inserting an AssistantMessage placeholder
-     * (the strategy repairAlternation() uses between two real exchanges) because:
-     *  - an unanswered user message carries no useful context — the model
-     *    receives the new question anyway on the next turn;
-     *  - a fake "[previous answer lost…]" message at the tail would pollute the
-     *    LLM context on every subsequent turn and waste tokens.
-     * The placeholder only makes sense *between* two real exchanges, which is
-     * why repairAlternation() is left untouched.
+     * This method MUST mirror that validator's state machine exactly. NeuronAI
+     * runs the validator on the WHOLE history at every addMessage() call, so a
+     * single invalid position anywhere bricks the thread forever with
+     * "Invalid message sequence at position N: expected role X, got Y" — every
+     * subsequent message fails, which is what the user experiences as "the chat
+     * answers an error to everything".
      *
-     * @param Message[] $messages
-     * @param bool      $changed  set to true when the orphan is removed
-     * @return Message[]
-     */
-    private function dropTrailingOrphanUser(array $messages, bool &$changed): array
-    {
-        if ($messages === []) {
-            return $messages;
-        }
-
-        $last = $messages[count($messages) - 1];
-
-        // A trailing tool message is handled by the first pass; never treat it
-        // as an orphan user here.
-        if ($last instanceof ToolCallMessage || $last instanceof ToolResultMessage) {
-            return $messages;
-        }
-
-        if ($last->getRole() === MessageRole::USER->value) {
-            // Only drop the trailing user message if it is truly orphaned, i.e.
-            // the message immediately before it is another USER message (or there
-            // is no preceding message at all). When the preceding message is an
-            // AssistantMessage or a ToolResultMessage, the trailing user is a
-            // legitimate new turn awaiting a response and must be preserved.
-            $count = count($messages);
-            if ($count === 1) {
-                // Single user message with no prior exchange — drop it.
-                array_pop($messages);
-                $changed = true;
-            } else {
-                $prev = $messages[$count - 2];
-                $prevRole = ($prev instanceof ToolCallMessage || $prev instanceof ToolResultMessage)
-                    ? null
-                    : $prev->getRole();
-                if ($prevRole === MessageRole::USER->value) {
-                    // Two consecutive user messages → the last one is an orphan.
-                    array_pop($messages);
-                    $changed = true;
-                }
-                // If prevRole is ASSISTANT (or null / tool message), the trailing
-                // user message is a valid new turn — leave it intact.
-            }
-        }
-
-        return $messages;
-    }
-
-    /**
-     * Insert AssistantMessage placeholders wherever two regular messages of
-     * the same role appear consecutively. Tool messages are passed through
-     * untouched because they have their own sequencing rules.
+     * The validator's rules, which the loop below reproduces:
+     *  - it starts out expecting a USER message (so a leading assistant message
+     *    is invalid);
+     *  - a ToolResultMessage means an ASSISTANT message must come next;
+     *  - a ToolCallMessage (ASSISTANT role) means a USER message may come next;
+     *  - regular messages must strictly alternate.
+     *
+     * A previous implementation reset the expected role to "anything" after a
+     * tool message. That let two real corruptions through, both observed in
+     * production: a turn interrupted after the tool result but before the
+     * assistant answer (PHP timeout on a long generation), and a history ending
+     * on an unanswered user message with a legitimate assistant message before
+     * it. Neither was repaired, and the thread was lost.
+     *
+     * Repair strategy: insert a placeholder of the missing role rather than
+     * dropping messages, so the persisted history keeps matching what the user
+     * sees in the chat window, and so a tool call that really did run (a file
+     * that was really created) stays in context. The pass is idempotent: a
+     * repaired history produces no new placeholder on the next load.
      *
      * @param Message[] $messages
      * @param bool      $changed  set to true when at least one placeholder is inserted
@@ -210,36 +177,92 @@ class SafeSQLChatHistory extends SQLChatHistory
         }
 
         $repaired = [];
-        $previousRole = null;
+        $expectingUser = true;
 
         foreach ($messages as $message) {
-            if ($message instanceof ToolCallMessage || $message instanceof ToolResultMessage) {
+            // Pass 1 above guarantees a tool result is preceded by its tool
+            // call. What must follow is the assistant's answer.
+            if ($message instanceof ToolResultMessage) {
                 $repaired[] = $message;
-                // Tool messages do not participate in the user/assistant
-                // alternation tracking — the next regular message starts a new
-                // "previous role" baseline.
-                $previousRole = null;
+                $expectingUser = false;
+                continue;
+            }
+
+            // A tool call carries the ASSISTANT role; what follows is either its
+            // tool result or the next user message.
+            if ($message instanceof ToolCallMessage) {
+                $repaired[] = $message;
+                $expectingUser = true;
                 continue;
             }
 
             $role = $message->getRole();
+            $expectedRole = $expectingUser ? MessageRole::USER->value : MessageRole::ASSISTANT->value;
 
-            if ($previousRole !== null && $role === $previousRole) {
-                $placeholderRole = $role === MessageRole::USER->value
-                    ? MessageRole::ASSISTANT
-                    : MessageRole::USER;
-                $placeholderText = $placeholderRole === MessageRole::ASSISTANT
-                    ? '[Réponse précédente perdue — une erreur technique a interrompu le traitement de votre message précédent.]'
-                    : '[Message utilisateur manquant restauré pour préserver l\'alternance de la conversation.]';
-                $repaired[] = new AssistantMessage($placeholderText, $placeholderRole);
+            if ($role !== $expectedRole) {
+                $repaired[] = $this->makePlaceholder($expectingUser ? MessageRole::USER : MessageRole::ASSISTANT);
                 $changed = true;
+                $expectingUser = !$expectingUser;
             }
 
             $repaired[] = $message;
-            $previousRole = $role;
+            $expectingUser = !$expectingUser;
         }
 
+        // NOTE: a history ending mid-turn (on an unanswered user message, or on a
+        // tool result whose assistant answer never reached the database) is left
+        // as-is on purpose. It is still valid on its own, and at load() time we
+        // cannot tell a dead turn from a turn currently running in async mode —
+        // closing it here would corrupt a live conversation. The repair happens
+        // in addMessage(), where the incoming message proves the turn is over.
         return $repaired;
+    }
+
+    /**
+     * Repair the alternation before the new message lands in the history.
+     *
+     * load() deliberately leaves a turn left open at the tail alone, because it
+     * cannot distinguish a dead turn from one still running in async mode. Here
+     * we can: a new message arriving proves the previous turn is over. If that
+     * turn never got its assistant answer — PHP timeout, fatal error, provider
+     * hang up after the tool result — the missing message is materialised now,
+     * before NeuronAI's trimmer validates the sequence and throws.
+     *
+     * This is also what heals threads already bricked in production: the next
+     * message the user sends repairs the history in place.
+     *
+     * @throws ChatHistoryException
+     */
+    public function addMessage(Message $message): ChatHistoryInterface
+    {
+        $candidate = $this->history;
+        $candidate[] = $message;
+
+        $changed = false;
+        $repaired = $this->repairAlternation($candidate, $changed);
+
+        if ($changed) {
+            // Drop the incoming message again: parent::addMessage() appends it.
+            array_pop($repaired);
+            $this->history = $repaired;
+        }
+
+        return parent::addMessage($message);
+    }
+
+    /**
+     * Build the synthetic message inserted to restore the alternation.
+     *
+     * AssistantMessage is used for both roles because it is the only concrete
+     * Message subclass accepting an explicit role; the role passed here is what
+     * the trimmer and the providers actually read.
+     */
+    private function makePlaceholder(MessageRole $role): AssistantMessage
+    {
+        return new AssistantMessage(
+            $role === MessageRole::ASSISTANT ? $this->lostAnswerText : $this->lostQuestionText,
+            $role
+        );
     }
 
     /**

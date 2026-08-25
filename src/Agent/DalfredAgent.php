@@ -261,6 +261,42 @@ class DalfredAgent extends Agent
     }
 
     /**
+     * The user's Dolibarr interface language (e.g. "en_US"). Resolved by the
+     * caller with $langs->getDefaultLang(), which already accounts for both the
+     * user preference and the instance default. Falls back to llx_user.lang.
+     */
+    private ?string $userLanguage = null;
+
+    public function setUserLanguage(string $languageCode): self
+    {
+        $this->userLanguage = $languageCode;
+
+        return $this;
+    }
+
+    /**
+     * Texts used for the synthetic messages SafeSQLChatHistory inserts when it
+     * repairs a broken conversation. Injected by the caller (which has $langs)
+     * so the user reads them in their own language; the service layer stays
+     * free of Dolibarr globals. Null means "use the English defaults".
+     */
+    private ?string $historyLostAnswerText = null;
+
+    private ?string $historyLostQuestionText = null;
+
+    /**
+     * @param string $lostAnswer   shown where the assistant answer was lost
+     * @param string $lostQuestion shown where the user message was lost
+     */
+    public function setHistoryPlaceholderTexts(string $lostAnswer, string $lostQuestion): self
+    {
+        $this->historyLostAnswerText = $lostAnswer;
+        $this->historyLostQuestionText = $lostQuestion;
+
+        return $this;
+    }
+
+    /**
      * Reset the cached chat history to force re-creation
      * This is needed when threadId changes after agent creation
      */
@@ -280,7 +316,9 @@ class DalfredAgent extends Agent
                     pdo: $pdo,
                     table: $tableName,
                     contextWindow: $this->contextWindow,
-                    truncator: $this->buildTruncator()
+                    truncator: $this->buildTruncator(),
+                    lostAnswerText: $this->historyLostAnswerText,
+                    lostQuestionText: $this->historyLostQuestionText
                 ));
             } catch (\Exception $e) {
                 error_log('[Dalfred] Failed to reset SafeSQLChatHistory: ' . $e->getMessage());
@@ -564,7 +602,7 @@ Si `mysql_select_query` est disponible :
 - Si tu dois additionner beaucoup de valeurs, utilise plutôt une requête SQL avec SUM() si le MySQL toolkit est disponible.
 
 ## Langue
-Réponds dans la langue de l'utilisateur (français par défaut).
+Réponds TOUJOURS dans la langue de l'utilisateur. Sa langue d'interface Dolibarr est indiquée dans la section « Utilisateur actuel » ci-dessous : utilise-la par défaut, y compris pour les messages d'erreur, les libellés que tu produis et les titres de tes tableaux. Si l'utilisateur t'écrit dans une autre langue, bascule dans celle-là. Les résultats bruts renvoyés par les outils peuvent être en français : traduis-les avant de les présenter.
 
 ## Contenus à coller (blocs copiables)
 
@@ -703,6 +741,11 @@ PROMPT;
             $prompt .= "\n\n## Utilisateur actuel\n";
             $prompt .= "Tu parles à {$name} (login: {$u['login']}, ID: {$u['id']}).\n";
             $prompt .= "Email : {$email}. Poste : {$job}. Administrateur : {$isAdmin}.\n";
+
+            $language = $this->userLanguage ?? ($u['lang'] ?? '');
+            if (!empty($language)) {
+                $prompt .= "Langue d'interface : {$language} — réponds-lui dans cette langue.\n";
+            }
             $prompt .= "Tutoie l'utilisateur par défaut.\n";
             $prompt .= "Quand l'utilisateur dit \"mes factures\", \"mes clients\", \"mon agenda\", filtre par son ID utilisateur (fk_user_author={$u['id']} ou fk_user_valid={$u['id']}).";
         }
@@ -974,7 +1017,9 @@ PROMPT;
                     pdo: $pdo,
                     table: $tableName,
                     contextWindow: $this->contextWindow,
-                    truncator: $this->buildTruncator()
+                    truncator: $this->buildTruncator(),
+                    lostAnswerText: $this->historyLostAnswerText,
+                    lostQuestionText: $this->historyLostQuestionText
                 );
             } catch (\Exception $e) {
                 // Log error and fall back to in-memory

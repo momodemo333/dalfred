@@ -3,6 +3,24 @@
  * Modern chat interface with AI assistant
  */
 
+/**
+ * Translation lookup, defined locally on purpose.
+ *
+ * DALFRED_TRANSLATIONS is injected by the widget hook on Dolibarr pages and by
+ * chat.php in full screen. Each file carries its own copy so that a browser
+ * still serving an older cached Dalfred script cannot break this one — the
+ * module's script tags have no version query string to bust the cache with.
+ * The fallback is English on purpose: a French default is exactly what used to
+ * leak to non-French users whenever a key was missing.
+ */
+function dalfredT(key, fallback) {
+    if (typeof DALFRED_TRANSLATIONS !== 'undefined' && DALFRED_TRANSLATIONS[key]) {
+        return DALFRED_TRANSLATIONS[key];
+    }
+    return fallback;
+}
+
+
 // Prevent multiple loading
 if (typeof window.dalfredChat !== 'undefined') {
     console.log('Dalfred: Already loaded, skipping');
@@ -255,8 +273,8 @@ class DalfredChat {
                     </div>
                 </div>
                 <div class="dalfred-header-actions">
-                    <button class="dalfred-knowledge" title="${t.memory || 'Mémoire'}">${DalfredIcon.render('brain')}</button>
-                    <button class="dalfred-expand" title="${t.fullscreen || 'Ouvrir en plein écran'}">${DalfredIcon.render('expand')}</button>
+                    <button class="dalfred-knowledge" title="${t.memory || 'Memory'}">${DalfredIcon.render('brain')}</button>
+                    <button class="dalfred-expand" title="${t.fullscreen || 'Open full screen'}">${DalfredIcon.render('expand')}</button>
                     <button class="dalfred-clear" title="${t.newConversation || 'Nouvelle conversation'}">${DalfredIcon.render('trash-2')}</button>
                     <button class="dalfred-close" title="${t.close || 'Fermer'}">×</button>
                 </div>
@@ -379,7 +397,7 @@ class DalfredChat {
                 });
             }
             // Drag & drop on the whole chat panel.
-            this.chat.setAttribute('data-drop-label', (typeof DALFRED_TRANSLATIONS !== 'undefined' && DALFRED_TRANSLATIONS.attachDropZone) || 'Déposez vos fichiers ici');
+            this.chat.setAttribute('data-drop-label', dalfredT('attachDropZone', 'Drop your files here'));
             var accept = window.DalfredConfig.attachmentsAcceptedTypes || '.txt,.md,.log,.csv,.jpg,.jpeg,.png,.gif,.webp';
             var _self = this;
             DalfredAttachments.enableDragDrop(this.chat, {
@@ -459,7 +477,7 @@ class DalfredChat {
         const expandBtn = this.chat.querySelector('.dalfred-expand');
         expandBtn.innerHTML = DalfredIcon.render('minimize');
         const t = (typeof DALFRED_TRANSLATIONS !== 'undefined') ? DALFRED_TRANSLATIONS : {};
-        expandBtn.title = t.reduce || 'Réduire';
+        expandBtn.title = t.reduce || 'Collapse';
 
         // Add overlay backdrop
         if (!document.getElementById('dalfred-overlay')) {
@@ -492,7 +510,7 @@ class DalfredChat {
         const expandBtn = this.chat.querySelector('.dalfred-expand');
         expandBtn.innerHTML = DalfredIcon.render('expand');
         const t = (typeof DALFRED_TRANSLATIONS !== 'undefined') ? DALFRED_TRANSLATIONS : {};
-        expandBtn.title = t.fullscreen || 'Ouvrir en plein écran';
+        expandBtn.title = t.fullscreen || 'Open full screen';
 
         // Remove overlay
         const overlay = document.getElementById('dalfred-overlay');
@@ -600,7 +618,7 @@ class DalfredChat {
                 this.pollForResponse(response.thread_id);
             } else if (response.status === 'already_processing') {
                 this.hideTyping();
-                this.addErrorMessage(response.error || 'Un message est déjà en cours de traitement.');
+                this.addErrorMessage(response.error || dalfredT('errorAlreadyProcessing', 'A message is already being processed.'));
             } else if (response.success) {
                 // Sync mode (fallback): immediate response
                 this.hideTyping();
@@ -659,7 +677,7 @@ class DalfredChat {
 
         // Timeout
         this.hideTyping();
-        this.addErrorMessage('La réponse a pris trop de temps. Veuillez réessayer.');
+        this.addErrorMessage(dalfredT('errorTimeout', 'The request took too long. Please try again.'));
         this.saveChatState();
     }
 
@@ -701,7 +719,7 @@ class DalfredChat {
                     : (a.size / 1024).toFixed(1) + ' Ko';
                 let nameNode;
                 if (a.expired) {
-                    nameNode = '<span class="dalfred-attach-name" title="' + nameSafe + '">' + nameSafe + ' (expiré)</span>';
+                    nameNode = '<span class="dalfred-attach-name" title="' + nameSafe + '">' + nameSafe + ' (' + dalfredT('attachExpired', 'expired') + ')</span>';
                 } else if (!a.url || a.url === '#') {
                     nameNode = '<span class="dalfred-attach-name" title="' + nameSafe + '">' + nameSafe + '</span>';
                 } else {
@@ -839,7 +857,7 @@ class DalfredChat {
 
     async clearHistory() {
         const t = (typeof DALFRED_TRANSLATIONS !== 'undefined') ? DALFRED_TRANSLATIONS : {};
-        if (confirm(t.clearConfirm || 'Effacer la conversation et en démarrer une nouvelle ?')) {
+        if (confirm(t.clearConfirm || 'Clear this conversation and start a new one?')) {
             this.messages.innerHTML = '';
             this.messageHistory = [];
 
@@ -870,11 +888,11 @@ class DalfredChat {
                 <p>${t.welcomeIntro || 'Je peux vous aider avec :'}</p>
                 <ul>
                     <li>🔍 ${t.helpSearch || 'Rechercher des clients, factures, commandes'}</li>
-                    <li>📊 ${t.helpAnalyze || 'Analyser vos données et statistiques'}</li>
-                    <li>➕ ${t.helpCreate || 'Créer de nouveaux éléments'}</li>
-                    <li>❓ ${t.helpQuestions || 'Répondre à vos questions sur Dolibarr'}</li>
+                    <li>📊 ${t.helpAnalyze || 'Analyse your data and statistics'}</li>
+                    <li>➕ ${t.helpCreate || 'Create new records'}</li>
+                    <li>❓ ${t.helpQuestions || 'Answer your questions about Dolibarr'}</li>
                 </ul>
-                <p><strong>${t.tryExample || 'Essayez : "Mes factures impayées" ou "CA du mois"'}</strong></p>
+                <p><strong>${t.tryExample || 'Try: "My unpaid invoices" or "This month\'s revenue"'}</strong></p>
             </div>
         `;
 

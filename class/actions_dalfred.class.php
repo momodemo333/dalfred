@@ -290,26 +290,8 @@ class ActionsDalfred
         // already-substituted (and now empty) placeholder.
         $agentName = $brandingService->getName();
 
-        $translations = array(
-            'widgetTitle' => $langs->transnoentities('WidgetTitle', $agentName),
-            'online' => $langs->transnoentities('WidgetOnline'),
-            'memory' => $langs->transnoentities('WidgetMemory'),
-            'fullscreen' => $langs->transnoentities('WidgetFullscreen'),
-            'newConversation' => $langs->transnoentities('WidgetNewConversation'),
-            'close' => $langs->transnoentities('WidgetClose'),
-            'placeholder' => $langs->transnoentities('WidgetPlaceholder'),
-            'send' => $langs->transnoentities('WidgetSend'),
-            'welcomeTitle' => $langs->transnoentities('WidgetWelcomeTitle', $agentName),
-            'welcomeIntro' => $langs->transnoentities('WidgetWelcomeIntro'),
-            'helpSearch' => $langs->transnoentities('WidgetHelpSearch'),
-            'helpAnalyze' => $langs->transnoentities('WidgetHelpAnalyze'),
-            'helpCreate' => $langs->transnoentities('WidgetHelpCreate'),
-            'helpQuestions' => $langs->transnoentities('WidgetHelpQuestions'),
-            'tryExample' => $langs->transnoentities('WidgetTryExample'),
-            'clearConfirm' => $langs->transnoentities('WidgetClearConfirm'),
-            'errorCommunication' => $langs->transnoentities('ErrorGeneric'),
-            'errorConnection' => $langs->transnoentities('ErrorNetwork'),
-        );
+        require_once dol_buildpath('/dalfred/lib/dalfred.lib.php');
+        $translations = dalfred_js_translations($langs, $agentName);
 
         $this->resprints .= '<script>';
         $this->resprints .= 'var DALFRED_ENABLED = true;';

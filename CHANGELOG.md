@@ -1,5 +1,56 @@
 # Changelog
 
+## [2.28.0] - 2026-08-25
+
+### Fixed
+- **Conversations permanently stuck on an error.** A thread could reach a state
+  where every single message came back as *"An error occurred while processing
+  your message."*, with no way out other than starting a new conversation. The
+  cause was a corrupted message history: NeuronAI validates the whole
+  user/assistant alternation on every write, so one bad position anywhere makes
+  the thread unusable forever (`Invalid message sequence at position N`).
+  The repair pass that was supposed to prevent this reset its expectations after
+  every tool message, which let two real corruptions through — both of them
+  produced by a turn interrupted mid-flight (PHP timeout on a long generation,
+  fatal error, provider hanging up):
+  - the assistant answer lost **after** the tool result was already saved;
+  - the assistant answer lost right after the user's message, with a legitimate
+    assistant message before it.
+  The repair now mirrors the validator's state machine exactly, and runs when
+  the next message is written rather than when the thread is loaded — so it can
+  tell a dead turn from one still running in async mode. **Threads already
+  broken repair themselves as soon as the user sends another message**, no
+  manual intervention needed.
+
+### Changed
+- **Chat messages are now translated.** Every message the chat can return —
+  error messages, the `/help` command listing, attachment warnings, the
+  placeholders inserted when repairing a conversation — went through
+  `$langs->trans()` and is available in French, English and Bulgarian. Non-French
+  speaking users used to receive French error messages regardless of their
+  Dolibarr language.
+- **The assistant is told the user's interface language.** The system prompt
+  said "French by default"; it now carries the user's actual Dolibarr language
+  and instructs the agent to answer in it, tool results included.
+- **A dedicated message for a corrupted conversation**, replacing the generic
+  error: it tells the user the thread has just been repaired and that sending
+  the message again is enough.
+- **The full-screen chat page now receives the JavaScript translation table.**
+  Only the widget injected it, so on `chat.php` every JS string silently fell
+  back to its hardcoded French default — drop zone, expired attachment,
+  unsupported file type, copy feedback, shared-command badge, timeout message —
+  whatever the user's language. The table is now built once in
+  `dalfred_js_translations()` and injected by both.
+
+### Added
+- Errors raised outside the agent run (configuration, MCP handshake, attachment
+  ingestion, a fatal thrown before the agent exists) are now recorded in the
+  admin **Activity log**. They previously only reached `dolibarr.log`, which is
+  usually out of reach on a customer instance.
+- Regression tests covering conversation repair: interrupted tool turn, orphan
+  user message, consecutive same-role messages, leading assistant message,
+  in-flight async turn left untouched, and repair idempotency.
+
 ## [2.27.1] - 2026-08-04
 
 ### Fixed

@@ -9,6 +9,24 @@
  * listed here (no point — it'd be redundant when the user is already
  * looking at the autocomplete list).
  */
+
+/**
+ * Translation lookup, defined locally on purpose.
+ *
+ * DALFRED_TRANSLATIONS is injected by the widget hook on Dolibarr pages and by
+ * chat.php in full screen. Each file carries its own copy so that a browser
+ * still serving an older cached Dalfred script cannot break this one — the
+ * module's script tags have no version query string to bust the cache with.
+ * The fallback is English on purpose: a French default is exactly what used to
+ * leak to non-French users whenever a key was missing.
+ */
+function dalfredT(key, fallback) {
+    if (typeof DALFRED_TRANSLATIONS !== 'undefined' && DALFRED_TRANSLATIONS[key]) {
+        return DALFRED_TRANSLATIONS[key];
+    }
+    return fallback;
+}
+
 (function () {
     'use strict';
 
@@ -106,7 +124,7 @@
             const html = this.items.map((c, i) => {
                 const cls = 'dalfred-cmd-item' + (i === this.activeIndex ? ' active' : '');
                 const badge = c.scope === 'shared'
-                    ? '<span class="dalfred-cmd-badge">partagée</span>'
+                    ? '<span class="dalfred-cmd-badge">' + dalfredT('commandShared', 'shared') + '</span>'
                     : '';
                 // Escape title — content comes from DB, never trust it raw.
                 const titleEsc = String(c.title)

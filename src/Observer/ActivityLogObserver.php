@@ -130,8 +130,20 @@ class ActivityLogObserver implements ObserverInterface
 
     private function logError(AgentError $data): void
     {
-        $ex = $data->exception;
+        $this->logThrowable($data->exception);
+    }
 
+    /**
+     * Record an exception that never reached the agent's own error event.
+     *
+     * The AgentError event only fires for failures raised inside the NeuronAI
+     * run. Everything that breaks around it — configuration, MCP handshake,
+     * attachment ingestion, a fatal thrown before the agent was even built —
+     * used to leave nothing but a syslog line, invisible from the admin
+     * Activity log where support actually looks first.
+     */
+    public function logThrowable(\Throwable $ex): void
+    {
         $message = mb_substr($ex->getMessage(), 0, 5000);
         $class = mb_substr(get_class($ex), 0, 255);
         $file = mb_substr($ex->getFile() . ':' . $ex->getLine(), 0, 500);

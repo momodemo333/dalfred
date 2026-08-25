@@ -51,6 +51,10 @@ if (!$res) {
 // Load autoloader for Dalfred classes
 require_once dol_buildpath('/dalfred/vendor/autoload.php');
 
+// Every message this endpoint returns is displayed as-is in the chat window, so
+// it must be in the user's language, not the developer's.
+$langs->loadLangs(array('errors', 'dalfred@dalfred'));
+
 use Dalfred\Agent\DalfredAgent;
 use Dalfred\Service\AsyncResponseService;
 use Dalfred\Service\CommandResolver;
@@ -76,14 +80,14 @@ if (!$user || !$user->id) {
 // Check if module is enabled
 if (!isModEnabled('dalfred')) {
     http_response_code(403);
-    $response['error'] = 'Module Dalfred non activé';
+    $response['error'] = $langs->transnoentities('ChatErrorModuleDisabled');
     die(json_encode($response));
 }
 
 // Check user permissions
 if (!$user->hasRight('dalfred', 'use')) {
     http_response_code(403);
-    $response['error'] = 'Accès non autorisé';
+    $response['error'] = $langs->transnoentities('ChatErrorNotAllowed');
     die(json_encode($response));
 }
 
@@ -97,6 +101,8 @@ if (!$user->hasRight('dalfred', 'use')) {
  */
 function dalfred_expand_command(string $message, \DoliDB $db, \User $user, \Conf $conf): string
 {
+    global $langs;
+
     $resolver = new CommandResolver($db);
     $parsed = $resolver->parse($message);
     if ($parsed === null) {
@@ -106,15 +112,15 @@ function dalfred_expand_command(string $message, \DoliDB $db, \User $user, \Conf
     // Built-in /help — list commands without hitting the LLM.
     if ($parsed['name'] === 'help') {
         $cmds = $resolver->listAvailable((int) $user->id, (int) $conf->entity, null, 100);
-        $body = "**Commandes disponibles**\n\n";
+        $body = '**' . $langs->transnoentities('ChatCommandsAvailable') . "**\n\n";
         if (empty($cmds)) {
-            $body .= "_Aucune commande pour le moment._ Demande à Dalfred d'en créer une (\"crée une commande /xxx qui...\") ou utilise la page **Connaissances** dans l'admin.";
+            $body .= $langs->transnoentities('ChatCommandsNone');
         } else {
             foreach ($cmds as $c) {
-                $scopeBadge = $c['scope'] === 'shared' ? ' _(partagée)_' : '';
+                $scopeBadge = $c['scope'] === 'shared' ? ' _(' . $langs->transnoentities('ChatCommandShared') . ')_' : '';
                 $body .= "- `/" . $c['name'] . "` — " . $c['title'] . $scopeBadge . "\n";
             }
-            $body .= "\nTape `/` au début d'un message pour les utiliser.";
+            $body .= "\n" . $langs->transnoentities('ChatCommandsHint');
         }
 
         echo json_encode([
@@ -160,7 +166,7 @@ if (str_starts_with($contentType, 'multipart/form-data')) {
         $configService = new ConfigService($db, (int) $conf->entity);
 
         if (!$configService->isAttachmentsEnabled()) {
-            $attachmentErrors[] = 'Pièces jointes désactivées par l\'administrateur';
+            $attachmentErrors[] = $langs->transnoentities('ChatErrorAttachmentsDisabled');
         } else {
             $attachSvc = new FileAttachmentService();
             $provider  = $configService->getProvider();
@@ -233,6 +239,13 @@ try {
 
     // Create agent from configuration
     $agent = DalfredAgent::createFromConfig($db, $user->id, $conf->entity);
+    // getDefaultLang() already blends the user preference with the instance
+    // default — the agent must answer in that language, not in the developer's.
+    $agent->setUserLanguage($langs->getDefaultLang());
+    $agent->setHistoryPlaceholderTexts(
+        $langs->transnoentities('ChatHistoryLostAnswer'),
+        $langs->transnoentities('ChatHistoryLostQuestion')
+    );
 
     // Pass page context to agent for system prompt injection
     if (!empty($context)) {
@@ -261,7 +274,7 @@ try {
     if ($asyncService->isProcessing($threadId)) {
         echo json_encode([
             'success' => false,
-            'error' => 'Un message est déjà en cours de traitement. Veuillez patienter.',
+            'error' => $langs->transnoentities('ChatErrorAlreadyProcessing'),
             'status' => 'already_processing',
             'thread_id' => $threadId
         ]);
@@ -311,6 +324,13 @@ try {
             $userError = mapErrorToUserMessage($bgError->getMessage());
             $asyncService->markError($threadId, $userError);
             dol_syslog('[Dalfred] Async: LLM error for thread=' . $threadId . ': ' . $bgError->getMessage(), LOG_ERR);
+
+            try {
+                (new \Dalfred\Observer\ActivityLogObserver($db, (int) $user->id, (int) $conf->entity, (string) $threadId))
+                    ->logThrowable($bgError);
+            } catch (\Throwable $ignored) {
+                dol_syslog('[Dalfred] Could not record async chat error in activity log: ' . $ignored->getMessage(), LOG_WARNING);
+            }
         }
     } else {
         // === SYNC MODE (fallback) ===
@@ -344,6 +364,24 @@ try {
     // Catch \Throwable to also handle PHP Errors (TypeError, etc.) that would
     // otherwise leave the thread locked in pending_response = 1.
     dol_syslog('[Dalfred] Chat error: ' . $e->getMessage(), LOG_ERR);
+
+    // Mirror it into the admin Activity log. Failures raised outside the agent
+    // run (configuration, MCP handshake, attachment ingestion, a fatal thrown
+    // before the agent even exists) never emit NeuronAI's AgentError event, so
+    // without this they would only ever appear in dolibarr.log — which support
+    // usually cannot reach on a customer instance.
+    try {
+        $errorObserver = new \Dalfred\Observer\ActivityLogObserver(
+            $db,
+            (int) $user->id,
+            (int) $conf->entity,
+            isset($threadId) && $threadId !== '' ? (string) $threadId : null
+        );
+        $errorObserver->logThrowable($e);
+    } catch (\Throwable $ignored) {
+        // Logging must never mask the original error.
+        dol_syslog('[Dalfred] Could not record chat error in activity log: ' . $ignored->getMessage(), LOG_WARNING);
+    }
 
     // If we were in async mode and marked processing, mark error
     if (isset($asyncService, $threadId) && $asyncService->isProcessing($threadId)) {
@@ -383,7 +421,8 @@ function extractResponseText($response): string
     }
 
     if (empty($text)) {
-        return "Je suis désolé, je n'ai pas pu générer une réponse. Pouvez-vous reformuler votre question ?";
+        global $langs;
+        return $langs->transnoentities('ChatEmptyResponse');
     }
 
     // Safety filter: detect when the LLM outputs a tool name as text instead of
@@ -391,8 +430,9 @@ function extractResponseText($response): string
     // "word_word_word" (snake_case, no spaces, no punctuation).
     $trimmed = trim($text);
     if (preg_match('/^[a-z][a-z0-9]*(_[a-z0-9]+)+$/', $trimmed) && strlen($trimmed) < 80) {
+        global $langs;
         dol_syslog('[Dalfred] Tool name leaked as text response: ' . $trimmed, LOG_WARNING);
-        return "Je traite votre demande, veuillez patienter un instant...";
+        return $langs->transnoentities('ChatProcessingPleaseWait');
     }
 
     return $text;
@@ -403,34 +443,42 @@ function extractResponseText($response): string
  */
 function mapErrorToUserMessage(string $errorMessage): string
 {
+    global $langs;
+
     if (strpos($errorMessage, 'API key') !== false) {
-        return 'La clé API n\'est pas configurée. Contactez l\'administrateur.';
+        return $langs->transnoentities('ChatErrorApiKeyMissing');
     }
     if (strpos($errorMessage, 'rate limit') !== false || preg_match('/\b429\b/', $errorMessage)) {
-        return 'Trop de requêtes. Veuillez patienter quelques instants.';
+        return $langs->transnoentities('ChatErrorRateLimit');
     }
     if (strpos($errorMessage, 'timeout') !== false) {
-        return 'La requête a pris trop de temps. Veuillez réessayer.';
+        return $langs->transnoentities('ChatErrorTimeout');
     }
     if (strpos($errorMessage, 'No messages in the chat history') !== false) {
-        return 'La conversation est devenue trop longue. Veuillez démarrer une nouvelle conversation.';
+        return $langs->transnoentities('ChatErrorHistoryTooLong');
+    }
+
+    // Corrupted conversation history. SafeSQLChatHistory repairs it when the
+    // next message is written, so the user only has to send it again.
+    if (strpos($errorMessage, 'Invalid message sequence') !== false) {
+        return $langs->transnoentities('ChatErrorHistoryCorrupted');
     }
 
     // API provider overloaded or unavailable (529 Anthropic, 503 any provider)
     if (strpos($errorMessage, 'overloaded') !== false || preg_match('/\b529\b/', $errorMessage)) {
-        return 'Le service IA est actuellement surchargé. Veuillez réessayer dans quelques minutes ou changer de modèle dans les paramètres.';
+        return $langs->transnoentities('ChatErrorProviderOverloaded');
     }
     if (preg_match('/\b50[234]\b/', $errorMessage) || strpos($errorMessage, 'Service Unavailable') !== false || strpos($errorMessage, 'Bad Gateway') !== false) {
-        return 'Le service IA est temporairement indisponible. Veuillez réessayer dans quelques instants.';
+        return $langs->transnoentities('ChatErrorProviderUnavailable');
     }
 
     // Authentication/authorization errors from provider
     if (preg_match('/\b401\b/', $errorMessage) && strpos($errorMessage, 'api.') !== false) {
-        return 'La clé API est invalide ou expirée. Contactez l\'administrateur.';
+        return $langs->transnoentities('ChatErrorApiKeyInvalid');
     }
     if (preg_match('/\b403\b/', $errorMessage) && strpos($errorMessage, 'api.') !== false) {
-        return 'L\'accès au service IA est refusé. Vérifiez la configuration de la clé API.';
+        return $langs->transnoentities('ChatErrorApiKeyForbidden');
     }
 
-    return 'Une erreur est survenue lors du traitement de votre message.';
+    return $langs->transnoentities('ChatErrorGeneric');
 }

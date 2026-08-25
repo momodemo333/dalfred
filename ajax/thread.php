@@ -49,6 +49,9 @@ if (!$res) {
 // Load autoloader for Dalfred classes
 require_once dol_buildpath('/dalfred/vendor/autoload.php');
 
+// This endpoint's messages are surfaced in the chat UI — translate them.
+$langs->loadLangs(array('errors', 'dalfred@dalfred'));
+
 use Dalfred\Service\AsyncResponseService;
 use Dalfred\Service\ThreadService;
 
@@ -62,21 +65,21 @@ $response = [
 // Security checks
 if (!$user || !$user->id) {
     http_response_code(401);
-    $response['error'] = 'Authentification requise';
+    $response['error'] = $langs->transnoentities('ChatErrorAuthRequired');
     die(json_encode($response));
 }
 
 // Check if module is enabled
 if (!isModEnabled('dalfred')) {
     http_response_code(403);
-    $response['error'] = 'Module Dalfred non activé';
+    $response['error'] = $langs->transnoentities('ChatErrorModuleDisabled');
     die(json_encode($response));
 }
 
 // Check user permissions
 if (!$user->hasRight('dalfred', 'use')) {
     http_response_code(403);
-    $response['error'] = 'Accès non autorisé';
+    $response['error'] = $langs->transnoentities('ChatErrorNotAllowed');
     die(json_encode($response));
 }
 
@@ -117,7 +120,7 @@ try {
 
             echo json_encode([
                 'success' => $result,
-                'message' => $result ? 'Thread réouvert' : 'Erreur lors de la réouverture',
+                'message' => $langs->transnoentities($result ? 'ThreadReopened' : 'ThreadReopenError'),
                 'thread_id' => $threadId
             ]);
             break;
@@ -170,14 +173,14 @@ try {
 
             echo json_encode([
                 'success' => $result,
-                'message' => $result ? 'Thread fermé' : 'Erreur lors de la fermeture'
+                'message' => $langs->transnoentities($result ? 'ThreadClosed' : 'ThreadCloseError')
             ]);
             break;
 
         case 'delete':
             // Delete a thread (requires manage permission)
             if (!$user->hasRight('dalfred', 'threads', 'manage')) {
-                echo json_encode(['success' => false, 'error' => 'Permission refusée']);
+                echo json_encode(['success' => false, 'error' => $langs->transnoentities('ChatErrorNotAllowed')]);
                 exit;
             }
 
@@ -190,7 +193,7 @@ try {
 
             echo json_encode([
                 'success' => $result,
-                'message' => $result ? 'Thread supprimé' : 'Erreur lors de la suppression'
+                'message' => $langs->transnoentities($result ? 'ThreadDeleted' : 'ThreadDeleteError')
             ]);
             break;
 

@@ -8,6 +8,24 @@
  *   getSelectedFiles() — current selection (for sendMessage)
  *   clear() — reset after send
  */
+
+/**
+ * Translation lookup, defined locally on purpose.
+ *
+ * DALFRED_TRANSLATIONS is injected by the widget hook on Dolibarr pages and by
+ * chat.php in full screen. Each file carries its own copy so that a browser
+ * still serving an older cached Dalfred script cannot break this one — the
+ * module's script tags have no version query string to bust the cache with.
+ * The fallback is English on purpose: a French default is exactly what used to
+ * leak to non-French users whenever a key was missing.
+ */
+function dalfredT(key, fallback) {
+    if (typeof DALFRED_TRANSLATIONS !== 'undefined' && DALFRED_TRANSLATIONS[key]) {
+        return DALFRED_TRANSLATIONS[key];
+    }
+    return fallback;
+}
+
 (function () {
     'use strict';
 
@@ -48,7 +66,7 @@
             }
             var f = files[i];
             if (!fileExtMatchesAccept(f, acceptStr)) {
-                errors.push(f.name + ' : type non supporté');
+                errors.push(f.name + ' : ' + dalfredT('attachUnsupported', 'unsupported file type'));
                 continue;
             }
             if (f.size > MAX_FILE_SIZE) {

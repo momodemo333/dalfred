@@ -12,6 +12,24 @@
  *
  * Single delegated listener attached to document. Survives DOM re-renders.
  */
+
+/**
+ * Translation lookup, defined locally on purpose.
+ *
+ * DALFRED_TRANSLATIONS is injected by the widget hook on Dolibarr pages and by
+ * chat.php in full screen. Each file carries its own copy so that a browser
+ * still serving an older cached Dalfred script cannot break this one — the
+ * module's script tags have no version query string to bust the cache with.
+ * The fallback is English on purpose: a French default is exactly what used to
+ * leak to non-French users whenever a key was missing.
+ */
+function dalfredT(key, fallback) {
+    if (typeof DALFRED_TRANSLATIONS !== 'undefined' && DALFRED_TRANSLATIONS[key]) {
+        return DALFRED_TRANSLATIONS[key];
+    }
+    return fallback;
+}
+
 (function() {
     'use strict';
 
@@ -203,7 +221,7 @@
         btn.classList.add('is-copied');
         var icon = btn.querySelector('.dalfred-copyable-icon');
         if (icon) icon.innerHTML = renderIcon('check', '✓');
-        btn.setAttribute('aria-label', 'Copié');
+        btn.setAttribute('aria-label', dalfredT('copied', 'Copied'));
         setTimeout(function() {
             btn.classList.remove('is-copied');
             if (icon) icon.innerHTML = renderIcon('copy', '&#128203;');
@@ -215,7 +233,7 @@
         btn.classList.add('is-failed');
         var icon = btn.querySelector('.dalfred-copyable-icon');
         if (icon) icon.innerHTML = renderIcon('x', '✕');
-        btn.setAttribute('aria-label', 'Échec de la copie');
+        btn.setAttribute('aria-label', dalfredT('copyFailed', 'Copy failed'));
         setTimeout(function() {
             btn.classList.remove('is-failed');
             if (icon) icon.innerHTML = renderIcon('copy', '&#128203;');

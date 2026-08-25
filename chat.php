@@ -231,6 +231,13 @@ print '<div class="fichecenter">';
 <script>
 // Translations for fullscreen chat
 var DALFRED_BASE_URL = <?php echo json_encode(dol_buildpath('/dalfred/', 1)); ?>;
+// Same table the widget hook injects on regular Dolibarr pages. Without it the
+// shared JS files (attachments, copyable blocks, commands) loaded here would
+// fall back to their hardcoded French strings whatever the user's language.
+var DALFRED_TRANSLATIONS = <?php
+    require_once dol_buildpath('/dalfred/lib/dalfred.lib.php');
+    echo json_encode(dalfred_js_translations($langs, $brandingService->getName()));
+?>;
 var DALFRED_I18N = <?php echo json_encode(array(
     'welcomeTitle' => sprintf($langs->transnoentities("WelcomeMessage"), $user->firstname ?: $user->login),
     'welcomeIntro' => $langs->transnoentities("WelcomeIntro", $brandingService->getName()),

@@ -106,3 +106,47 @@ function dalfred_get_version()
     $mod = new modDalfred($db);
     return $mod->version;
 }
+
+/**
+ * Build the translation table handed to the chat JavaScript.
+ *
+ * Shared by the widget (injected by the hook on every Dolibarr page) and by the
+ * full-screen chat page, which used to inject nothing at all — every JS string
+ * there fell back to its hardcoded French default whatever the user's language.
+ *
+ * @param  Translate $langs     already loaded with dalfred@dalfred
+ * @param  string    $agentName the configured brand name
+ * @return array<string,string>
+ */
+function dalfred_js_translations($langs, string $agentName): array
+{
+    return array(
+        'widgetTitle' => $langs->transnoentities('WidgetTitle', $agentName),
+        'online' => $langs->transnoentities('WidgetOnline'),
+        'memory' => $langs->transnoentities('WidgetMemory'),
+        'fullscreen' => $langs->transnoentities('WidgetFullscreen'),
+        'reduce' => $langs->transnoentities('WidgetReduce'),
+        'newConversation' => $langs->transnoentities('WidgetNewConversation'),
+        'close' => $langs->transnoentities('WidgetClose'),
+        'placeholder' => $langs->transnoentities('WidgetPlaceholder'),
+        'send' => $langs->transnoentities('WidgetSend'),
+        'welcomeTitle' => $langs->transnoentities('WidgetWelcomeTitle', $agentName),
+        'welcomeIntro' => $langs->transnoentities('WidgetWelcomeIntro'),
+        'helpSearch' => $langs->transnoentities('WidgetHelpSearch'),
+        'helpAnalyze' => $langs->transnoentities('WidgetHelpAnalyze'),
+        'helpCreate' => $langs->transnoentities('WidgetHelpCreate'),
+        'helpQuestions' => $langs->transnoentities('WidgetHelpQuestions'),
+        'tryExample' => $langs->transnoentities('WidgetTryExample'),
+        'clearConfirm' => $langs->transnoentities('WidgetClearConfirm'),
+        'errorCommunication' => $langs->transnoentities('ErrorGeneric'),
+        'errorConnection' => $langs->transnoentities('ErrorNetwork'),
+        'errorTimeout' => $langs->transnoentities('ChatErrorTimeout'),
+        'errorAlreadyProcessing' => $langs->transnoentities('ChatErrorAlreadyProcessing'),
+        'attachDropZone' => $langs->transnoentities('AttachDropZone'),
+        'attachExpired' => $langs->transnoentities('AttachExpired'),
+        'attachUnsupported' => $langs->transnoentities('AttachUnsupported'),
+        'copied' => $langs->transnoentities('Copied'),
+        'copyFailed' => $langs->transnoentities('CopyFailed'),
+        'commandShared' => $langs->transnoentities('ChatCommandShared'),
+    );
+}
