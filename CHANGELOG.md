@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.29.1] - 2026-08-26
+
+### Fixed
+Three things a real session driving the MCP SQL tools ran into.
+
+- **Schema exploration returned a truncated slice.** `dolibarr_sql_schema`
+  called without a table listed every column of every table — around 380 KB on
+  an ordinary instance, which the server then cut at 200 tables in alphabetical
+  order. The answer stopped part-way through the alphabet and common tables such
+  as `llx_facture` were simply absent, with nothing telling the caller. It now
+  returns table names only in that case (393 tables in 13 KB on the same
+  instance, complete), and the columns are one call away on the table that
+  matters.
+- **An exact table name behaved as a prefix.** Asking for `llx_facture` returned
+  `llx_facture`, `llx_facturedet`, `llx_facture_extrafields` and a dozen more —
+  large enough to break a client's response limit, which is why the exact name
+  appeared to fail while a shortened one worked. An exact match now wins; the
+  prefix behaviour is kept for a name matching no table.
+- **`duration_ms` was always 0** for anything fast: the value was rounded to an
+  integer. It is fractional now.
+
+### Changed
+- **`SELECT *` is allowed on ordinary tables.** It used to be refused on
+  principle, on the grounds that a third-party module table could hold a key
+  nobody had listed. That reasoning still stands, so instead of assuming, the
+  columns the star stands for are now resolved and run through the same policy:
+  the query is allowed where nothing sensitive is exposed, and refused — naming
+  the offending column — where something is. `SELECT * FROM llx_societe` works;
+  `SELECT * FROM llx_user` is refused because of `pass`. If the columns cannot
+  be resolved at all, the refusal stands: "could not find out" must never be
+  read as "nothing to hide".
+- The schema tool's description now states that `datef` and `date_lim_reglement`
+  are `date` while `datec` and `tms` are `datetime`, in server time.
+
 ## [2.29.0] - 2026-08-25
 
 ### Added
