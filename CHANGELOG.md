@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.29.2] - 2026-08-28
+
+### Fixed
+- **The new SQL permission was shown in English** on the user permissions
+  screen. Dolibarr translates a permission through a `Permission<id>` key, and
+  the one for `sqlquery` was missing; the other five Dalfred permissions had
+  theirs. Added in French, English and Bulgarian.
+
 ## [2.29.1] - 2026-08-26
 
 ### Fixed

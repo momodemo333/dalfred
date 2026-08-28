@@ -570,6 +570,7 @@ Copied=Copié
 CopyFailed=Échec de la copie
 
 # --- MCP SQL access ---
+Permission49140806 = Exécuter des requêtes SQL en lecture seule via MCP
 DalfredSqlAccessTab=Accès SQL MCP
 DalfredSqlAccess=Accès SQL MCP
 DalfredSqlAccessScope=Cette page ne concerne QUE l'accès SQL exposé via le serveur MCP externe (clients comme claude.ai ou Claude Code). Les outils SQL utilisés par Dalfred dans le chat se configurent dans l'onglet « Permissions des toolkits » et sont indépendants de ces réglages.
