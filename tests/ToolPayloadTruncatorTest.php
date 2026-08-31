@@ -47,11 +47,35 @@ function makeTool(string $name, array $inputs = [], string $result = ''): Tool {
 // Default threshold: 8000 chars = 2000 tokens.
 $t = new ToolPayloadTruncator();
 
-echo "=== isLatestPair=true never truncates ===\n";
+echo "=== isLatestPair=true keeps ordinary payloads intact ===\n";
 $tool = makeTool('dolibarr_files_create', ['filename' => 'x', 'format' => 'csv', 'content' => str_repeat('A', 50000)]);
 $msg = new ToolCallMessage(null, [$tool]);
 $result = $t->truncateForPersistence($msg, true);
 assertEq(50000, strlen($result->getTools()[0]->getInputs()['content']), 'latest pair untouched');
+
+// The grace given to the latest pair used to be unconditional, and that is how
+// a thread died in production (SEREM, 2026-08-21): analyze_mysql_database_schema
+// returned a very large result, setMessages() rewrites the WHOLE history in one
+// UPDATE, MySQL refused it with "Got a packet bigger than 'max_allowed_packet'",
+// so the assistant message was never stored — and the resulting hole in the
+// history bricked the conversation on the next turn.
+//
+// A result that cannot be persisted is worth less than a truncated one, so the
+// grace now stops at an absolute ceiling.
+echo "\n=== isLatestPair=true still yields to the absolute ceiling ===\n";
+$huge = makeTool('analyze_mysql_database_schema', ['table' => 'llx_facture'], str_repeat('B', 400000));
+$msg = new ToolResultMessage([$huge]);
+$result = $t->truncateForPersistence($msg, true);
+$persisted = strlen((string) $result->getTools()[0]->getResult());
+assertEq(true, $persisted < 300000, 'oversized latest result is capped (got ' . $persisted . ' chars)');
+assertContains('[elided', (string) $result->getTools()[0]->getResult(), 'capped result carries the elision marker');
+
+$hugeCall = makeTool('dolibarr_files_create', ['filename' => 'big', 'format' => 'csv', 'content' => str_repeat('C', 400000)]);
+$msg = new ToolCallMessage(null, [$hugeCall]);
+$result = $t->truncateForPersistence($msg, true);
+$persistedCall = strlen((string) $result->getTools()[0]->getInputs()['content']);
+assertEq(true, $persistedCall < 300000, 'oversized latest call is capped (got ' . $persistedCall . ' chars)');
+assertEq('big', $result->getTools()[0]->getInputs()['filename'], 'other args survive the cap');
 
 echo "\n=== UserMessage / AssistantMessage are pass-through ===\n";
 $u = new UserMessage('hi');

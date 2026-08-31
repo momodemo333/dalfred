@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.29.3] - 2026-08-28
+
+### Fixed
+- **A large tool result could break the conversation permanently.** Found in a
+  customer's activity log, where the chain was visible end to end: a schema
+  analysis returned a very large result, the history write was refused by MySQL
+  with *"Got a packet bigger than 'max_allowed_packet' bytes"*, so the
+  assistant message was never stored — and the hole it left bricked the thread
+  on the next turn with the alternation error fixed in 2.28.0.
+
+  2.28.0 already stopped the thread from dying, but the turn was still lost
+  every time. The cause is fixed here: tool payloads were capped at 8 000
+  characters *except* for the latest call/result pair, deliberately kept intact
+  so the model could re-read it on the immediate follow-up. That grace had no
+  upper bound, and since the whole history is rewritten in a single UPDATE, one
+  oversized result was enough to make the row unwritable.
+
+  The grace now stops at an absolute ceiling of 256 KB — far above any
+  legitimate payload, far below any realistic `max_allowed_packet` (1 MB on a
+  default XAMPP). A result of 98 KB is still persisted untouched; one of 588 KB
+  is elided rather than lost. The ceiling applies even when payload truncation
+  is switched off, since it exists to keep the write within what the server
+  accepts, not to save context.
+
 ## [2.29.2] - 2026-08-28
 
 ### Fixed
