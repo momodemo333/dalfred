@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.30.1] - 2026-09-02
+
+### Fixed
+- **`CAST(x AS DECIMAL(20,6))` was refused as a syntax error** by the MCP SQL
+  tool. `CAST` was never the problem — `DECIMAL(20)` and `CHAR(10)` worked —
+  the comma inside the type parameters was, which made formatting amounts with
+  a scale impossible. Types with a scale are accepted now, including inside
+  aggregates and `CONVERT`. Everything else still fails closed, and the SQL
+  hardening suite is unchanged.
+
 ## [2.30.0] - 2026-09-02
 
 ### Added
