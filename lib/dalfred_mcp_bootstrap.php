@@ -121,3 +121,81 @@ function dalfred_sql_config()
 {
 	return new \DolibarrMcpSql\SqlConfig('dalfred', 'dalfred_', 'DALFRED');
 }
+
+/**
+ * Describe this installation for the MCP environment tool.
+ *
+ * The MCP package cannot work any of this out on its own — it has no access to
+ * Dolibarr's constants or database. Building it here is cheap: everything comes
+ * from constants already loaded, plus one indexed query for the module list.
+ *
+ * @param  bool $sqlEnabled Whether read-only SQL was granted for this session
+ * @return \DolibarrMcp\Config\EnvironmentInfo
+ */
+function dalfred_mcp_environment($sqlEnabled = false)
+{
+	global $conf, $db;
+
+	return new \DolibarrMcp\Config\EnvironmentInfo(
+		defined('DOL_VERSION') ? DOL_VERSION : null,
+		'dalfred',
+		dalfred_get_version(),
+		dalfred_mcp_enabled_modules($db),
+		isset($conf->entity) ? (int) $conf->entity : null,
+		isModEnabled('multicompany'),
+		array('readonly_sql' => (bool) $sqlEnabled)
+	);
+}
+
+/**
+ * The Dolibarr modules currently enabled, by slug.
+ *
+ * Read from llx_const rather than $conf->modules: the latter is not populated
+ * on every entry point, and an empty list would read as "no modules installed"
+ * rather than "we did not look".
+ *
+ * Enabling a module writes MAIN_MODULE_<NAME> = 1, but several sub-keys share
+ * that prefix and that value — MAIN_MODULE_EVENTORGANIZATION_MODELS,
+ * ..._TRIGGERS and friends. They are recognised structurally rather than by a
+ * list of known suffixes: a sub-key always has its parent module in the same
+ * result set, so anything whose prefix is itself in the list is dropped. That
+ * stays correct for a module whose own name contains an underscore.
+ *
+ * @param  DoliDB $db Database handler
+ * @return array<int, string>
+ */
+function dalfred_mcp_enabled_modules($db)
+{
+	$sql = "SELECT name FROM ".MAIN_DB_PREFIX."const";
+	$sql .= " WHERE name LIKE 'MAIN_MODULE_%' AND value = '1'";
+	$sql .= " ORDER BY name ASC";
+
+	$resql = $db->query($sql);
+	if (!$resql) {
+		return array();
+	}
+
+	$names = array();
+	while ($obj = $db->fetch_object($resql)) {
+		$names[] = $obj->name;
+	}
+	$known = array_flip($names);
+
+	$modules = array();
+	foreach ($names as $name) {
+		$isSubKey = false;
+		$position = strlen('MAIN_MODULE_');
+		while (($position = strpos($name, '_', $position)) !== false) {
+			if (isset($known[substr($name, 0, $position)])) {
+				$isSubKey = true;
+				break;
+			}
+			$position++;
+		}
+		if (!$isSubKey) {
+			$modules[] = strtolower(substr($name, strlen('MAIN_MODULE_')));
+		}
+	}
+
+	return $modules;
+}

@@ -234,7 +234,13 @@ $sessionDir = DOL_DATA_ROOT.'/dalfred/mcp_sessions';
 try {
 	// A null capability keeps the SQL tools out of discovery entirely.
 	$sqlCapability = dalfredBuildSqlCapability($db, $conf, $apiKey);
-	$response = DolibarrMcp\Bootstrap::handleHttpRequest(null, $sessionDir, $config, $sqlCapability);
+
+	// Lets the agent ask what it is connected to instead of guessing — Dolibarr
+	// version, enabled modules, and whether SQL is available in this session.
+	dol_include_once('/dalfred/lib/dalfred.lib.php');
+	$environment = dalfred_mcp_environment($sqlCapability !== null);
+
+	$response = DolibarrMcp\Bootstrap::handleHttpRequest(null, $sessionDir, $config, $sqlCapability, $environment);
 	DolibarrMcp\Bootstrap::emit($response);
 } catch (Throwable $e) {
 	dol_syslog('[DALFRED] ERROR '.$e->getMessage(), LOG_ERR);

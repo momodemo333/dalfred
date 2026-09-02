@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.30.0] - 2026-09-02
+
+### Added
+- **New MCP tool `dolibarr_environment`.** An external agent can now ask what it
+  is connected to instead of finding out through calls that fail: Dolibarr and
+  PHP versions, the version of Dalfred serving the session, the MCP server
+  version, the list of enabled Dolibarr modules, the entity, whether
+  multicompany is active, and whether read-only SQL was granted to it.
+
+  Two uses. For the agent: knowing the Dolibarr version and which modules exist
+  lets it adapt its calls, and look up version-specific behaviour when needed,
+  rather than discovering absent endpoints one refusal at a time. For you:
+  asking the assistant "which version of the module is this install running?"
+  now has an answer, which is the quickest way to tell whether a customer is up
+  to date.
+
+  The tool is ungated on purpose — knowing what you are connected to should not
+  itself require a grant — and takes no parameters.
+
 ## [2.29.3] - 2026-08-28
 
 ### Fixed
