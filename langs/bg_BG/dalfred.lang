@@ -539,3 +539,5 @@ CopyFailed = Копирането е неуспешно
 # --- MCP SQL access ---
 Permission49140806 = Изпълнение на SQL заявки само за четене чрез MCP
 DalfredSqlAccessTab = MCP SQL достъп
+# --- MCP activity / audit ---
+DalfredMcpActivityTab = MCP активност

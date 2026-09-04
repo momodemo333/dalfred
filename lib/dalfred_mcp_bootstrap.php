@@ -199,3 +199,60 @@ function dalfred_mcp_enabled_modules($db)
 
 	return $modules;
 }
+
+/**
+ * Register the dolibarr-mcp-audit autoloader and return the library directory.
+ *
+ * Same shape as the OAuth and SQL loaders. Returns null when no copy is
+ * present; the caller must then run without logging rather than fail, since a
+ * missing audit library is a packaging problem, not a reason to refuse a
+ * legitimate call.
+ *
+ * @return string|null Directory holding the library, or null when absent
+ */
+function dalfred_mcp_audit_autoload()
+{
+	static $registered = null;
+	if ($registered !== null) {
+		return $registered ?: null;
+	}
+	$candidates = array(
+		dol_buildpath('/dalfred/dolibarr-mcp-audit', 0),
+		dol_buildpath('/dalfred/vendor/dolibarr-mcp-audit', 0),
+		dol_buildpath('/emmcp/vendor/dolibarr-mcp-audit', 0),
+	);
+	$libDir = '';
+	foreach ($candidates as $candidate) {
+		if ($candidate && is_dir($candidate.'/src')) {
+			$libDir = $candidate;
+			break;
+		}
+	}
+	if ($libDir === '') {
+		$registered = false;
+		return null;
+	}
+	spl_autoload_register(function ($class) use ($libDir) {
+		$prefix = 'DolibarrMcpAudit\\';
+		if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
+			return;
+		}
+		$rel = str_replace('\\', '/', substr($class, strlen($prefix)));
+		$file = $libDir.'/src/'.$rel.'.php';
+		if (is_file($file)) {
+			require $file;
+		}
+	});
+	$registered = $libDir;
+	return $libDir;
+}
+
+/**
+ * The per-module parameterization handed to the audit objects.
+ *
+ * @return \DolibarrMcpAudit\AuditConfig
+ */
+function dalfred_mcp_audit_config()
+{
+	return new \DolibarrMcpAudit\AuditConfig('dalfred', 'dalfred_', 'DALFRED');
+}

@@ -17,7 +17,7 @@ namespace Dalfred\Service;
 class DalfredMigrations
 {
     /** Current module version — must match modDalfred::$version */
-    public const MODULE_VERSION = '2.30.1';
+    public const MODULE_VERSION = '2.31.0';
 
     /**
      * Models that have been deprecated by their provider and must be remapped
@@ -616,6 +616,39 @@ class DalfredMigrations
             $r = self::registerSqlQueryRight($db);
 
             return $p || $a || $i1 || $i2 || $i3 || $r;
+        });
+
+        // === v2.31.0: MCP call log ===
+        // Backs both the audit trail and the rate limiter — the limiter counts
+        // these rows, so there is no second store that could disagree with what
+        // an administrator reads.
+        $helper->addCallbackMigration('2.31.0', function (\DoliDB $db) use ($helper): bool {
+            $sql = "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "dalfred_mcp_log ("
+                . "rowid integer AUTO_INCREMENT PRIMARY KEY,"
+                . "entity integer DEFAULT 1 NOT NULL,"
+                . "fk_user integer NOT NULL,"
+                . "date_creation datetime NOT NULL,"
+                . "method varchar(64) NOT NULL,"
+                . "tool_name varchar(128) NULL,"
+                . "arguments text NULL,"
+                . "duration_ms integer DEFAULT 0 NOT NULL,"
+                . "success tinyint DEFAULT 1 NOT NULL,"
+                . "error_message varchar(255) NULL,"
+                . "client_name varchar(128) NULL"
+                . ") ENGINE=innodb";
+            $created = (bool) $db->query($sql);
+
+            // The composite index covers the rate-limit count, which runs on
+            // every single call and is the one query that must not degrade as
+            // the table grows.
+            $i1 = $helper->addIndexIfMissing(
+                'dalfred_mcp_log',
+                'idx_dalfred_mcp_log_user_date',
+                'entity, fk_user, date_creation'
+            );
+            $i2 = $helper->addIndexIfMissing('dalfred_mcp_log', 'idx_dalfred_mcp_log_date', 'date_creation');
+
+            return $created || $i1 || $i2;
         });
 
         return $helper;

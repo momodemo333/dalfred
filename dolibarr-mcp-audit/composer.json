@@ -1,0 +1,15 @@
+{
+    "name": "momodemo333/dolibarr-mcp-audit",
+    "description": "Shared call logging, rate limiting and alerting for MCP-enabled Dolibarr modules (emMCP, Dalfred)",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "require": {
+        "php": "^8.1"
+    },
+    "autoload": {
+        "psr-4": { "DolibarrMcpAudit\\": "src/" }
+    },
+    "config": {
+        "platform": { "php": "8.1.32" }
+    }
+}

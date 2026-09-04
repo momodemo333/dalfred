@@ -90,6 +90,14 @@ function dalfred_admin_prepare_head()
     $head[$h][2] = 'sqlaccess';
     $h++;
 
+    // MCP activity: the call log, the rate limit and the alert live together
+    // because an administrator reading the log is exactly the person who then
+    // wants to change the limit.
+    $head[$h][0] = dol_buildpath('/dalfred/admin/mcp_activity.php', 1);
+    $head[$h][1] = $langs->trans("DalfredMcpActivityTab");
+    $head[$h][2] = 'mcpactivity';
+    $h++;
+
     // About tab
     $head[$h][0] = dol_buildpath('/dalfred/admin/about.php', 1);
     $head[$h][1] = $langs->trans("About");

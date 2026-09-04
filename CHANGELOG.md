@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.31.0] - 2026-09-04
+
+### Added
+- **MCP call log, rate limit and alerting**, in a new admin tab *"Activité MCP"*.
+
+  Dolibarr permissions say *what* a user may read; they say nothing about *how
+  much*. An employee entitled to look up customers one at a time is not thereby
+  entitled to pull the whole customer base in an afternoon, and until now
+  nothing in the MCP surface noticed the difference. This adds the missing half.
+
+  - **Call log** — one row per MCP call: who, which tool, with which arguments,
+    how long it took, and whether it succeeded. For support when a customer
+    reports a problem, and for traceability when someone asks what an agent
+    actually read. Tool *results* are never stored: a log that copies the data
+    it is meant to police becomes a second copy to protect. Arguments are
+    recorded (that is what makes a call auditable) but can be switched off.
+  - **Rate limit** — a per-user cap on tool calls over a rolling window.
+    Refusals answer with the numbers, so the agent knows to wait rather than
+    retry blindly. Only tool calls count: connecting and listing tools consume
+    nothing, and refused calls are recorded but not counted, so a retrying
+    client cannot deepen its own hole.
+  - **Email alert** — warns an administrator when a user's volume stands out,
+    with a per-user cooldown so one intensive session sends one mail rather
+    than fifty.
+
+  Both the limit and the alert are **off by default**: only the administrator
+  knows what normal use looks like on their instance. Logging is on, because an
+  MCP surface with no trail is not something to end up with by omission.
+
+  Shared with emMCP through the new `dolibarr-mcp-audit` library, so a fix
+  benefits both.
+
 ## [2.30.1] - 2026-09-02
 
 ### Fixed
