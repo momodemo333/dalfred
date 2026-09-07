@@ -116,6 +116,58 @@ final class McpAudit
     }
 
     /**
+     * Did this MCP response actually carry a failure?
+     *
+     * The transport answers 200 for a tool that failed: the error travels
+     * inside the JSON-RPC payload, as a protocol-level "error" object or as a
+     * tool result flagged isError. Judging success by the HTTP status alone
+     * recorded a Dolibarr 403 as a successful call, which is exactly backwards
+     * for the two things this log is for — telling support what went wrong, and
+     * showing an administrator which reads actually returned data.
+     *
+     * @param  string $payload Response body, JSON or SSE
+     * @return string|null     Short reason when it failed, null when it did not
+     */
+    public static function failureReason(string $payload): ?string
+    {
+        if ($payload === '') {
+            return null;
+        }
+
+        // Streamable HTTP frames the JSON in SSE "data:" lines; a plain JSON
+        // body has none, and passing it through this loop leaves it untouched.
+        $chunks = [];
+        foreach (explode("\n", $payload) as $line) {
+            $line = trim($line);
+            if (str_starts_with($line, 'data:')) {
+                $chunks[] = trim(substr($line, 5));
+            }
+        }
+        if ($chunks === []) {
+            $chunks = [$payload];
+        }
+
+        foreach ($chunks as $chunk) {
+            $decoded = json_decode($chunk, true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            if (isset($decoded['error']['message']) && is_string($decoded['error']['message'])) {
+                return $decoded['error']['message'];
+            }
+
+            if (($decoded['result']['isError'] ?? false) === true) {
+                $text = $decoded['result']['content'][0]['text'] ?? 'tool reported an error';
+
+                return is_string($text) ? $text : 'tool reported an error';
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Pull the method, tool name and arguments out of a raw JSON-RPC body.
      *
      * Kept here so both host modules read a request the same way, and so a
