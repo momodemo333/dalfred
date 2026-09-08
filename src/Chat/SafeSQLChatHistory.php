@@ -20,7 +20,7 @@ use NeuronAI\Exceptions\ChatHistoryException;
  * Extended SQLChatHistory that sanitizes a persisted history on load so it
  * passes NeuronAI v3's HistoryTrimmer::validateAlternation() check.
  *
- * Three failure modes are repaired:
+ * Four failure modes are repaired:
  *
  *  1. Orphan tool messages. When a conversation is interrupted during tool
  *     execution (PHP timeout, server crash, ToolRunsExceededException), the
@@ -51,6 +51,16 @@ use NeuronAI\Exceptions\ChatHistoryException;
  *     only forms after load(). We drop the trailing orphan user instead of
  *     inserting a placeholder (an unanswered question carries no context worth
  *     keeping and a fake tail message would waste tokens every turn).
+ *
+ *  4. Tool arrays that are not PHP lists. Some provider paths hand back a tools
+ *     array whose first key is not 0 (Gemini's HandleChat filters the response
+ *     parts with a key-preserving array_filter). Such an array serialises to a
+ *     JSON object instead of a JSON array, and Gemini rejects the resulting
+ *     request with `Invalid JSON payload received. Unknown name "1" at
+ *     'contents[N].parts'`. Because the message is persisted, every later turn
+ *     re-sends it and gets the same 400 — the thread answers an error to every
+ *     question, exactly like case 2 but through a different route. See
+ *     ToolListNormalizer for the full analysis.
  *
  * Whenever the sanitizer changes the history, it persists the cleaned version
  * back to the database via setMessages(), so the corruption is healed once
@@ -105,7 +115,12 @@ class SafeSQLChatHistory extends SQLChatHistory
 
         $cleaned = [];
         $count = count($this->history);
-        $changed = false;
+
+        // Repair #4 (see class docblock). Runs first: a holed tools array is a
+        // property of individual messages, independent of their sequence, and
+        // healing it here means the cleaned history is persisted back below in
+        // the same write as any alternation repair.
+        $changed = ToolListNormalizer::normalizeAll($this->history);
 
         for ($i = 0; $i < $count; $i++) {
             $message = $this->history[$i];
@@ -235,6 +250,12 @@ class SafeSQLChatHistory extends SQLChatHistory
      */
     public function addMessage(Message $message): ChatHistoryInterface
     {
+        // Repair #4 (see class docblock): the provider may hand us a tool
+        // message whose tools array is not a list. Fixing it here — before it
+        // is appended, persisted, and re-sent on every later turn — is what
+        // stops the corruption from ever reaching the database.
+        ToolListNormalizer::normalize($message);
+
         $candidate = $this->history;
         $candidate[] = $message;
 
@@ -274,6 +295,10 @@ class SafeSQLChatHistory extends SQLChatHistory
      */
     protected function setMessages(array $messages): void
     {
+        // Last line of defence before the write: whatever route a message took
+        // to get here, it must not be stored with a holed tools array.
+        ToolListNormalizer::normalizeAll($messages);
+
         $latestPairIndex = $this->findLatestToolPairIndex($messages);
         $count = count($messages);
 

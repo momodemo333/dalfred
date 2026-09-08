@@ -1,5 +1,50 @@
 # Changelog
 
+## [2.31.1] - 2026-09-08
+
+### Fixed
+- **Conversations definitively stuck on Gemini with an HTTP 400 "Unknown name" error.**
+
+  A customer reported a thread that answered an error to every question, on a
+  recent version, after several upgrades had already been installed. The
+  activity log showed the same failure repeating every few minutes:
+
+  ```
+  HTTP 400 during POST gemini-2.5-flash:generateContent
+  "Invalid JSON payload received. Unknown name \"1\" at 'contents[32].parts':
+   Cannot find field."   status: INVALID_ARGUMENT
+  ```
+
+  Root cause is a PHP array that is no longer a *list*. `Providers/Gemini/HandleChat.php`
+  picks the function calls out of a model response with `array_filter()`, which
+  preserves the original keys. When Gemini emits a `text` or `thought` part
+  *before* the `functionCall` — routine behaviour with the 2.5 models — the
+  surviving array starts at key 1. `json_encode()` then serialises it as an
+  object `{"1": ...}` instead of an array, and `Providers/Gemini/MessageMapper::mapToolsResult()`
+  copies those keys straight into the `parts` payload. Google's schema wants a
+  list, so the request is rejected.
+
+  What turned a transient glitch into a permanent one is that the malformed
+  message was *persisted*. `AbstractChatHistory::deserializeToolCallResult()`
+  rebuilds the tools with a key-preserving `array_map()`, so the hole came back
+  on every load and was re-sent on every turn. The customer's thread had been
+  opened four months earlier: the corruption lived in their data, not in the
+  code they kept updating, which is why no upgrade ever fixed it.
+
+  The new `Dalfred\Chat\ToolListNormalizer` reindexes the tools carried by
+  `ToolCallMessage` and `ToolResultMessage` whenever they are not a proper list.
+  `SafeSQLChatHistory` calls it in three places: on `load()`, so an already
+  corrupted thread heals itself and the repaired history is written back once;
+  on `addMessage()`, so a malformed message coming from the provider never
+  reaches the database; and on `setMessages()`, as a last check before any
+  write. Healthy histories cost one `array_is_list()` call and are left
+  untouched.
+
+  This is the same end-user symptom as the broken alternation repaired in
+  2.28.0 — a thread that answers an error to everything — reached through a
+  completely different route. Both are now self-healing: the next message sent
+  on an affected thread repairs it.
+
 ## [2.31.0] - 2026-09-04
 
 ### Added
