@@ -17,7 +17,7 @@ namespace Dalfred\Service;
 class DalfredMigrations
 {
     /** Current module version — must match modDalfred::$version */
-    public const MODULE_VERSION = '2.31.1';
+    public const MODULE_VERSION = '2.32.0';
 
     /**
      * Models that have been deprecated by their provider and must be remapped

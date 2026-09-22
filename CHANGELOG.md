@@ -1,5 +1,47 @@
 # Changelog
 
+## [2.32.0] - 2026-09-22
+
+### Fixed
+- **Searches by e-mail, name or phone returned the wrong record instead of no record.**
+
+  A customer reported that Dalfred answered again, but could no longer find
+  third parties or contacts by e-mail, name or phone. The activity log showed
+  the assistant looking up an address and confidently presenting a company with
+  a completely different e-mail. The tool call had succeeded; only the filter
+  had gone missing.
+
+  `dolibarr_list` accepts a `filters` argument, documented to the model as
+  "filter by field values". Its decoded keys were merged straight into the HTTP
+  query string — and Dolibarr's router binds only the parameters an endpoint
+  declares in its `index()` signature, discarding every other query parameter
+  without a word. `GET /thirdparties?email=…` therefore ran as a plain
+  unfiltered list. None of the endpoints that matter accept the names a model
+  naturally reaches for: `thirdparties` has no `email` or `name`, `contacts`
+  has no `email`, `invoices` has no `socid` and its `status` expects
+  `draft`/`unpaid`/`paid`/`cancelled` rather than a number.
+
+  What made this worse than an outright failure is that it was invisible. An
+  unfiltered list looks exactly like a successful match, so the assistant had
+  no way to know its filter had been ignored and presented the first unrelated
+  row as the answer — a plausible, well-formed, wrong reply.
+
+  Filters are now translated before the request. Every key resolves to a native
+  endpoint parameter, a known alias (`socid` becomes whatever the endpoint
+  really expects, `name` becomes `nom`/`label`/`title`/`subject` depending on
+  the resource), a SQL filter on the matching column, or an explicit refusal
+  naming the supported alternative — never to silence. An empty result now
+  means "no match" rather than "filter dropped".
+
+  The assistant is also told, in its tool documentation, that thirdparties and
+  contacts are separate resources: not finding an address among companies does
+  not mean the person is absent, and it should search contacts too.
+
+### Changed
+- Embedded MCP server updated to 2.6.0, which carries the filter fix and
+  corrects the filtering examples given to the model — several taught the wrong
+  field names, and one labelled prospects as suppliers.
+
 ## [2.31.1] - 2026-09-08
 
 ### Fixed
