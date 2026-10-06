@@ -659,3 +659,24 @@ DalfredMcpPurged=%s row(s) removed from the log.
 DalfredMcpPurgeFailed=The log purge failed.
 DalfredMcpAuditMissing=The dolibarr-mcp-audit library is missing. Calls are neither logged nor limited. Reinstall the module.
 DalfredMcpSchemaOutOfDate=The database schema is out of date: the log may be incomplete.
+
+# External MCP: granted accesses (OAuth) and Authorization header self-test
+DalfredMcpAccessIntro=Each line is an AI client a user connected through OAuth (claude.ai, ChatGPT, Claude Desktop...). The access renews itself as long as the client uses it, and lapses after 30 days without use.
+DalfredMcpAccessGranted=Active accesses
+DalfredMcpAccessClient=Client
+DalfredMcpAccessSince=Granted on
+DalfredMcpAccessLastRenewal=Last renewal
+DalfredMcpAccessExpires=Lapses on
+DalfredMcpAccessNone=No active access.
+DalfredMcpAccessRevoke=Revoke
+DalfredMcpAccessRevoked=Access revoked. The client will have to ask the user to sign in and consent again.
+DalfredMcpAccessRevokeHelp=Revoking ends the access at once. To prevent a user from connecting again, remove their permission or disable their account; removing their REST API key also ends every OAuth access they gave.
+DalfredMcpProbeAuth=Authorization header
+DalfredMcpProbeAuthHelp=MCP clients authenticate with an "Authorization: Bearer" header. Apache running PHP as CGI/FastCGI drops it unless told otherwise, and many hosts ignore the .htaccess shipped with the module: the only symptom is a 401 right after a successful sign-in. This check asks the endpoint itself whether the header reaches it.
+DalfredMcpProbeAuthRun=Check now
+DalfredMcpProbeAuthOk=The Authorization header reaches Dolibarr
+DalfredMcpProbeAuthLost=The Authorization header does NOT reach Dolibarr: OAuth and Bearer clients will get a 401. Add one of these to the web server configuration of this site:
+DalfredMcpProbeAuthApache=Apache 2.4.13 or later, in the Directory or VirtualHost of Dolibarr
+DalfredMcpProbeAuthApacheAlt=older Apache, needs mod_setenvif
+DalfredMcpProbeAuthNginx=nginx with PHP-FPM, in the location that passes .php to FastCGI
+DalfredMcpProbeAuthUnreachable=The server could not call its own endpoint (%s): the check is inconclusive, test from a client.

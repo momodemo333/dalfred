@@ -59,6 +59,37 @@ if ($mcpExternalEnabled) {
     $apiEnabled = isModEnabled('api');
 }
 
+// --- Granted accesses and Authorization header self-test --------------------
+$action = GETPOST('action', 'aZ09');
+$oauthServer = $mcpExternalEnabled ? new \DolibarrMcpOAuth\OAuthServer($db, new \DolibarrMcpOAuth\ExposureConfig('dalfred', 'dcp_', 'DALFRED')) : null;
+
+if ($action == 'revoke' && $oauthServer !== null) {
+    $nb = $oauthServer->revokeGrant(GETPOSTINT('client'), GETPOSTINT('userid'));
+    if ($nb < 0) {
+        setEventMessages($oauthServer->error, null, 'errors');
+    } else {
+        dol_syslog('[DALFRED] OAuth access of client '.GETPOSTINT('client').' for user '.GETPOSTINT('userid').' revoked by '.$user->login, LOG_NOTICE);
+        setEventMessages($langs->trans('DalfredMcpAccessRevoked'), null, 'mesgs');
+    }
+    header('Location: '.$_SERVER['PHP_SELF']);
+    exit;
+}
+
+$probe = '';
+$probeDetail = '';
+if ($action == 'probe' && $mcpExternalEnabled) {
+    require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+    // Local addresses are allowed on purpose: the server calls its own URL.
+    $r = getURLContent($mcpEndpoint, 'POST', '{}', 1, array('Content-Type: application/json', 'Authorization: Bearer dalfred-probe', 'X-Dolibarr-Probe: 1'), array('http', 'https'), 2, -1);
+    $json = (empty($r['curl_error_no']) && !empty($r['content'])) ? json_decode($r['content'], true) : null;
+    if (is_array($json) && isset($json['authorization_seen'])) {
+        $probe = $json['authorization_seen'] ? 'seen' : 'lost';
+    } else {
+        $probe = 'unreachable';
+        $probeDetail = !empty($r['curl_error_msg']) ? $r['curl_error_msg'] : 'HTTP '.(isset($r['http_code']) ? $r['http_code'] : '?');
+    }
+}
+
 /*
  * View
  */
@@ -176,6 +207,46 @@ print \DolibarrMcpOAuth\Support\UrlHelper::codeBlock($mcpJson, 'mcp.json');
 print '</div>';
 
 print '<div class="info">'.$langs->trans('DalfredMcpApiKeyHelp').'</div>';
+
+// Accesses granted through OAuth, and the button that ends one.
+print '<br>';
+print load_fiche_titre($langs->trans('DalfredMcpAccessGranted'), '', '');
+print '<span class="opacitymedium">'.$langs->trans('DalfredMcpAccessIntro').'</span><br><br>';
+print '<div class="div-table-responsive-no-min"><table class="noborder centpercent">';
+print '<tr class="liste_titre"><td>'.$langs->trans('DalfredMcpAccessClient').'</td><td>'.$langs->trans('User').'</td>';
+print '<td class="center">'.$langs->trans('DalfredMcpAccessSince').'</td><td class="center">'.$langs->trans('DalfredMcpAccessLastRenewal').'</td>';
+print '<td class="center">'.$langs->trans('DalfredMcpAccessExpires').'</td><td class="right"></td></tr>';
+$grants = $oauthServer !== null ? $oauthServer->listGrants() : array();
+if (empty($grants)) {
+    print '<tr class="oddeven"><td colspan="6"><span class="opacitymedium">'.$langs->trans('DalfredMcpAccessNone').'</span></td></tr>';
+}
+foreach ($grants as $g) {
+    $name = ($g->client_name !== '' && $g->client_name !== null) ? $g->client_name : $g->client_id;
+    print '<tr class="oddeven"><td>'.dol_escape_htmltag($name).'</td><td>'.dol_escape_htmltag((string) $g->login).'</td>';
+    print '<td class="center">'.dol_print_date($db->jdate($g->granted), 'dayhour').'</td>';
+    print '<td class="center">'.dol_print_date($db->jdate($g->last_used), 'dayhour').'</td>';
+    print '<td class="center">'.dol_print_date($db->jdate($g->expires), 'dayhour').'</td>';
+    print '<td class="right"><a class="button smallpaddingimp" href="'.$_SERVER['PHP_SELF'].'?action=revoke&client='.((int) $g->fk_client).'&userid='.((int) $g->fk_user).'&token='.newToken().'">'.$langs->trans('DalfredMcpAccessRevoke').'</a></td></tr>';
+}
+print '</table></div>';
+print '<span class="opacitymedium small">'.$langs->trans('DalfredMcpAccessRevokeHelp').'</span>';
+
+// Authorization header self-test
+print '<br><br>';
+print load_fiche_titre($langs->trans('DalfredMcpProbeAuth'), '', '');
+print '<span class="opacitymedium">'.$langs->trans('DalfredMcpProbeAuthHelp').'</span><br><br>';
+print '<a class="button smallpaddingimp" href="'.$_SERVER['PHP_SELF'].'?action=probe&token='.newToken().'">'.$langs->trans('DalfredMcpProbeAuthRun').'</a>';
+if ($probe == 'seen') {
+    print ' &nbsp; <span class="badge badge-status4 badge-status">'.$langs->trans('DalfredMcpProbeAuthOk').'</span>';
+} elseif ($probe == 'lost') {
+    print '<div class="warning" style="margin-top: 8px;">'.$langs->trans('DalfredMcpProbeAuthLost').'<br>';
+    print '<code>CGIPassAuth On</code> &nbsp;<span class="opacitymedium">'.$langs->trans('DalfredMcpProbeAuthApache').'</span><br>';
+    print '<code>SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1</code> &nbsp;<span class="opacitymedium">'.$langs->trans('DalfredMcpProbeAuthApacheAlt').'</span><br>';
+    print '<code>fastcgi_param HTTP_AUTHORIZATION $http_authorization;</code> &nbsp;<span class="opacitymedium">'.$langs->trans('DalfredMcpProbeAuthNginx').'</span>';
+    print '</div>';
+} elseif ($probe == 'unreachable') {
+    print ' &nbsp; <span class="opacitymedium">'.$langs->trans('DalfredMcpProbeAuthUnreachable', dol_escape_htmltag($probeDetail)).'</span>';
+}
 
 print dol_get_fiche_end();
 

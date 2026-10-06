@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.33.0] - 2026-10-06
+
+Concerns the external MCP access (OAuth connectors: claude.ai, ChatGPT,
+Claude Desktop). Same fixes as emMCP 1.7.0, which embeds the same OAuth
+library (1.1.0) and MCP runtime (2.6.1).
+
+### Security
+- **Removing a user's REST API key did not end their OAuth access.** The key
+  the tools act through was regenerated on every MCP call when missing, so the
+  natural way for an administrator to cut someone's access was silently undone
+  by the next request. The key is now created only when the user consents;
+  removing it, or disabling the user, ends every OAuth access they gave.
+- **An authorization code or refresh token could be used several times at
+  once**; now exactly one request gets tokens, and a code or refresh token
+  presented a second time revokes everything issued under that grant.
+- The consent form always requires its CSRF token, whatever the global setting.
+- Client registration is capped at 50 per hour; clients that never obtained a
+  token are purged after a day.
+
+### Added
+- **Granted accesses** on the external MCP page: every AI client a user
+  connected, when it was granted and last renewed, and a Revoke button.
+- **Authorization header check** on the same page: says whether the header
+  reaches PHP, and which line to add for Apache or nginx if it does not.
+- Authorization responses carry `iss` (RFC 9207).
+
+### Fixed
+- **Claude Desktop (mcp-remote) could not connect**: it rejected the OpenID
+  discovery document, which lacked `jwks_uri`. That route now has its own
+  document; claude.ai, ChatGPT and Claude Code are unaffected.
+- `client_secret_basic` works under PHP-FPM.
+- Creating a supplier or customer without a code now lets Dolibarr number it,
+  instead of leaving it without a code or failing with a 500.
+
 ## [2.32.0] - 2026-09-22
 
 ### Fixed
