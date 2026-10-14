@@ -20,28 +20,32 @@ final class ModelCapacityRegistry
     private const CAPACITIES = [
         // OpenAI — keys cover every model exposed in ConfigService::getModelsForProvider('openai').
         // Variants (e.g. gpt-5.5, gpt-5.4-mini, gpt-5-mini, gpt-4.1-mini, o3-mini, o4-mini) resolve via longest-prefix match.
-        // GPT-5.6 (Sol/Terra/Luna, 2026-07) carries a 1.05M window — the
+        // GPT-5.6 (2026-07) and GPT-6.x (2026-08/09) carry a 1.05M window — the
         // 'gpt-5.6' prefix wins over 'gpt-5' by longest-prefix match.
+        'gpt-6'              => 1_050_000,
         'gpt-5.6'            => 1_050_000,
         'gpt-5'              => 400_000,
         'gpt-4.1'            => 1_000_000,
         'gpt-4o'             => 128_000,
         'o3'                 => 200_000,
         'o4'                 => 200_000,
-        // Anthropic — values returned by GET /v1/models on 2026-07-14.
+        // Anthropic — values returned by GET /v1/models on 2026-10-14.
         'claude-fable-5'     => 1_000_000,
+        'claude-opus-5'      => 1_000_000,
+        'claude-haiku-5'     => 1_000_000,
         'claude-sonnet-5'    => 1_000_000,
         'claude-opus-4-8'    => 1_000_000,
         'claude-opus-4-7'    => 1_000_000,
         'claude-opus-4-6'    => 1_000_000,
         'claude-sonnet-4-6'  => 1_000_000,
-        'claude-sonnet-4-5'  => 1_000_000,
+        'claude-sonnet-4-5'  => 200_000,
         'claude-sonnet-4'    => 200_000,
         'claude-haiku-4'     => 200_000,
         'claude-opus-4'      => 200_000,
         'claude-3-5-sonnet'  => 200_000,
         'claude-3-5-haiku'   => 200_000,
-        // Mistral — values returned by GET /v1/models on 2026-07-14.
+        // Mistral — values returned by GET /v1/models on 2026-10-14.
+        'mistral-large-4'    => 1_048_576,
         'mistral-large'      => 262_144,
         'mistral-medium'     => 262_144,
         'mistral-small'      => 262_144,
@@ -54,6 +58,10 @@ final class ModelCapacityRegistry
         'open-mistral-nemo'  => 128_000,
         // Google — GET /v1beta/models reports a 1,048,576-token input limit
         // for every general-purpose Gemini model exposed by Dalfred.
+        'gemini-4'           => 1_000_000,
+        'gemini-3.8-flash'   => 1_000_000,
+        'gemini-3.7-flash'   => 1_000_000,
+        'gemini-3.6-flash'   => 1_000_000,
         'gemini-3.1-pro'     => 1_000_000,
         'gemini-3.5-flash'   => 1_000_000,
         'gemini-3.1-flash'   => 1_000_000,

@@ -26,6 +26,8 @@ assertTrue(ProviderCapabilities::supportsImages('gemini', 'gemini-2.5-pro'), 'ge
 
 echo "\n=== OpenAI: vision-capable models only ===\n";
 assertTrue(ProviderCapabilities::supportsImages('openai', 'gpt-4o'), 'openai / gpt-4o');
+assertTrue(ProviderCapabilities::supportsImages('openai', 'gpt-6.1-sol'), 'openai / gpt-6.1-sol');
+assertTrue(ProviderCapabilities::supportsPdfNative('openai', 'gpt-6-astra'), 'openai / gpt-6-astra pdf');
 assertTrue(ProviderCapabilities::supportsImages('openai', 'gpt-4-turbo'), 'openai / gpt-4-turbo');
 assertTrue(ProviderCapabilities::supportsImages('openai', 'gpt-4-vision-preview'), 'openai / gpt-4-vision');
 assertTrue(!ProviderCapabilities::supportsImages('openai', 'gpt-3.5-turbo'), 'openai / gpt-3.5 (no vision)');

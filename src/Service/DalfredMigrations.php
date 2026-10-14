@@ -17,7 +17,7 @@ namespace Dalfred\Service;
 class DalfredMigrations
 {
     /** Current module version — must match modDalfred::$version */
-    public const MODULE_VERSION = '2.32.0';
+    public const MODULE_VERSION = '2.34.0';
 
     /**
      * Models that have been deprecated by their provider and must be remapped
@@ -45,7 +45,57 @@ class DalfredMigrations
         // Gemini 1.5 family — EOL announced by Google in September 2025.
         'gemini-1.5-pro' => 'gemini-2.5-pro',
         'gemini-1.5-flash' => 'gemini-2.5-flash',
+        // Claude before 4.5 — Anthropic returns not_found_error on
+        // /v1/messages for every one of these IDs (verified 2026-10-14). Each
+        // goes to the oldest still-served model of its tier, the closest in
+        // behaviour.
+        'claude-opus-4-1-20250805' => 'claude-opus-4-8',
+        'claude-opus-4-1' => 'claude-opus-4-8',
+        'claude-opus-4-20250514' => 'claude-opus-4-8',
+        'claude-opus-4-0' => 'claude-opus-4-8',
+        'claude-3-opus-20240229' => 'claude-opus-4-8',
+        'claude-sonnet-4-20250514' => 'claude-sonnet-4-6',
+        'claude-sonnet-4-0' => 'claude-sonnet-4-6',
+        'claude-3-7-sonnet-20250219' => 'claude-sonnet-4-6',
+        'claude-3-7-sonnet-latest' => 'claude-sonnet-4-6',
+        'claude-3-5-sonnet-20241022' => 'claude-sonnet-4-6',
+        'claude-3-5-sonnet-latest' => 'claude-sonnet-4-6',
+        'claude-3-5-haiku-20241022' => 'claude-haiku-4-5-20251001',
+        'claude-3-5-haiku-latest' => 'claude-haiku-4-5-20251001',
+        'claude-3-haiku-20240307' => 'claude-haiku-4-5-20251001',
+        // Mistral — "Invalid model" on chat/completions (verified 2026-10-14).
+        'mistral-large-2411' => 'mistral-large-latest',
+        'pixtral-large-latest' => 'mistral-large-latest',
     ];
+
+    /**
+     * Replace a stored DALFRED_MODEL that the provider no longer serves by its
+     * successor from DEPRECATED_MODEL_REMAP. A no-op for any other value,
+     * including models that are old but still served.
+     *
+     * @param \DoliDB $db Database handler
+     * @return bool True when the model was changed
+     */
+    public static function remapDeprecatedModel(\DoliDB $db): bool
+    {
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+        global $conf;
+        $entity = (int) ($conf->entity ?? 1);
+
+        $currentModel = \getDolGlobalString('DALFRED_MODEL');
+        if ($currentModel === '' || !isset(self::DEPRECATED_MODEL_REMAP[$currentModel])) {
+            return false;
+        }
+
+        $newModel = self::DEPRECATED_MODEL_REMAP[$currentModel];
+        \dolibarr_set_const($db, 'DALFRED_MODEL', $newModel, 'chaine', 0, '', $entity);
+        \dol_syslog(
+            '[Dalfred] Remapped deprecated DALFRED_MODEL "' . $currentModel
+            . '" -> "' . $newModel . '" (entity ' . $entity . ')',
+            LOG_NOTICE
+        );
+        return true;
+    }
 
     /**
      * Create and configure a ModuleMigrationHelper with all Dalfred migrations
@@ -406,25 +456,7 @@ class DalfredMigrations
         //
         // Idempotent: the migration is a no-op when DALFRED_MODEL is already
         // a working model.
-        $helper->addCallbackMigration('2.19.2', function (\DoliDB $db): bool {
-            require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
-            global $conf;
-            $entity = (int) ($conf->entity ?? 1);
-
-            $currentModel = \getDolGlobalString('DALFRED_MODEL');
-            if ($currentModel === '' || !isset(self::DEPRECATED_MODEL_REMAP[$currentModel])) {
-                return false;
-            }
-
-            $newModel = self::DEPRECATED_MODEL_REMAP[$currentModel];
-            \dolibarr_set_const($db, 'DALFRED_MODEL', $newModel, 'chaine', 0, '', $entity);
-            \dol_syslog(
-                '[Dalfred] Remapped deprecated DALFRED_MODEL "' . $currentModel
-                . '" -> "' . $newModel . '" (entity ' . $entity . ')',
-                LOG_NOTICE
-            );
-            return true;
-        });
+        $helper->addCallbackMigration('2.19.2', [self::class, 'remapDeprecatedModel']);
 
         // === v2.20.0: LLM context observability — token usage table ===
         // Creates llx_dalfred_token_usage to record 1 row per LLM inference.
@@ -650,6 +682,11 @@ class DalfredMigrations
 
             return $created || $i1 || $i2;
         });
+
+        // === v2.34.0: same remap, rerun with the retired Claude (pre-4.5) and
+        // Mistral IDs added to DEPRECATED_MODEL_REMAP. Installations already
+        // past 2.19.2 would never see the new entries otherwise.
+        $helper->addCallbackMigration('2.34.0', [self::class, 'remapDeprecatedModel']);
 
         return $helper;
     }

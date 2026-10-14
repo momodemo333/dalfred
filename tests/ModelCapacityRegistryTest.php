@@ -38,6 +38,12 @@ assertEq(1_000_000, ModelCapacityRegistry::get('claude-fable-5'),    'fable 5 = 
 assertEq(1_000_000, ModelCapacityRegistry::get('claude-sonnet-5'),   'sonnet 5 = 1M');
 assertEq(1_050_000, ModelCapacityRegistry::get('gpt-5.6-sol'),       'gpt-5.6-sol = 1.05M (prefix gpt-5.6 wins over gpt-5)');
 assertEq(1_050_000, ModelCapacityRegistry::get('gpt-5.6-luna'),      'gpt-5.6-luna = 1.05M');
+assertEq(1_050_000, ModelCapacityRegistry::get('gpt-6.1-sol'),       'gpt-6.1-sol = 1.05M');
+assertEq(1_000_000, ModelCapacityRegistry::get('claude-opus-5-5'),   'claude-opus-5-5 = 1M');
+assertEq(1_000_000, ModelCapacityRegistry::get('claude-haiku-5-5'),  'claude-haiku-5-5 = 1M');
+assertEq(1_048_576, ModelCapacityRegistry::get('mistral-large-4'),   'mistral-large-4 = 1M');
+assertEq(262_144, ModelCapacityRegistry::get('mistral-large-latest'), 'mistral-large-latest stays Large 3');
+assertEq(1_000_000, ModelCapacityRegistry::get('gemini-4-argon'),    'gemini-4-argon = 1M');
 assertEq(1_050_000, ModelCapacityRegistry::get('gpt-5.6-terra'),     'gpt-5.6-terra = 1.05M');
 assertEq(1_000_000, ModelCapacityRegistry::get('claude-opus-4-8'),   'opus 4.8 = 1M');
 assertEq(1_000_000, ModelCapacityRegistry::get('claude-opus-4-7'),   'opus 4.7 = 1M');

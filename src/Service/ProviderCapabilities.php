@@ -25,7 +25,7 @@ final class ProviderCapabilities
      * Update this when a new vision model ships.
      */
     private const VISION_MODELS = [
-        'openai'  => ['gpt-5', 'gpt-4o', 'gpt-4-turbo', 'gpt-4-vision', 'gpt-4.1', 'o1', 'o3'],
+        'openai'  => ['gpt-6', 'gpt-5', 'gpt-4o', 'gpt-4-turbo', 'gpt-4-vision', 'gpt-4.1', 'o1', 'o3'],
         'mistral' => ['pixtral', 'mistral-large', 'mistral-medium', 'mistral-small', 'ministral-', 'magistral-small'],
         'ollama'  => ['llava', 'bakllava', 'llama3.2-vision', 'minicpm-v', 'moondream'],
     ];
@@ -74,7 +74,7 @@ final class ProviderCapabilities
      * coverage is provider-wide.
      */
     private const PDF_NATIVE_MODELS = [
-        'openai' => ['gpt-5', 'gpt-4o', 'gpt-4-turbo', 'gpt-4.1', 'o1', 'o3'],
+        'openai' => ['gpt-6', 'gpt-5', 'gpt-4o', 'gpt-4-turbo', 'gpt-4.1', 'o1', 'o3'],
     ];
 
     /**

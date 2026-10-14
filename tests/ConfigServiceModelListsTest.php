@@ -85,25 +85,35 @@ foreach ($cloudProviders as $provider) {
     }
 }
 
-echo "\n=== July 2026 curation: key models present, retired ones absent ===\n";
+echo "\n=== October 2026 curation: key models present, retired ones absent ===\n";
 $anthropic = ConfigService::getModelsForProvider('anthropic');
+check(isset($anthropic['claude-sonnet-5-5']), 'anthropic exposes claude-sonnet-5-5');
+check(isset($anthropic['claude-opus-5-5']), 'anthropic exposes claude-opus-5-5');
+check(isset($anthropic['claude-fable-5-1']), 'anthropic exposes claude-fable-5-1');
+check(isset($anthropic['claude-haiku-5-5']), 'anthropic exposes claude-haiku-5-5');
+check(!isset($anthropic['claude-opus-4-1-20250805']), 'anthropic drops retired claude-opus-4-1');
 check(isset($anthropic['claude-fable-5']), 'anthropic exposes claude-fable-5');
 check(isset($anthropic['claude-sonnet-5']), 'anthropic exposes claude-sonnet-5');
 check(isset($anthropic['claude-opus-4-8']), 'anthropic still exposes claude-opus-4-8');
 check(isset($anthropic[ConfigService::DEFAULT_MODEL]), 'anthropic list contains DEFAULT_MODEL (' . ConfigService::DEFAULT_MODEL . ')');
 
 $openai = ConfigService::getModelsForProvider('openai');
+check(isset($openai['gpt-6.1-sol']), 'openai exposes gpt-6.1-sol');
+check(isset($openai['gpt-6-astra']), 'openai exposes gpt-6-astra');
 check(isset($openai['gpt-5.6-sol']), 'openai exposes gpt-5.6-sol');
 check(!isset($openai['gpt-5.6-terra']), 'openai omits gpt-5.6-terra until it is usable with the configured API surface/key');
-check(!isset($openai['gpt-5.6-luna']), 'openai omits gpt-5.6-luna until rollout is reliable');
+check(isset($openai['gpt-5.6-luna']), 'openai exposes gpt-5.6-luna (5/5 pings on 2026-10-14)');
 
 $mistral = ConfigService::getModelsForProvider('mistral');
 check(isset($mistral['mistral-medium-latest']), 'mistral exposes current medium alias');
+check(isset($mistral['mistral-large-4']), 'mistral exposes Large 4');
 check(isset($mistral['ministral-14b-latest']), 'mistral exposes current Ministral family');
 check(isset($mistral['magistral-small-latest']), 'mistral exposes non-deprecated reasoning alias');
 check(!isset($mistral['magistral-medium-latest']), 'mistral removes deprecated Magistral Medium');
 
 $gemini = ConfigService::getModelsForProvider('gemini');
+check(isset($gemini['gemini-3.8-flash']), 'gemini exposes gemini-3.8-flash');
+check(isset($gemini['gemini-4-argon']), 'gemini exposes gemini-4-argon');
 check(isset($gemini['gemini-3.5-flash']), 'gemini exposes gemini-3.5-flash');
 check(isset($gemini['gemini-3.1-pro-preview']), 'gemini exposes current Pro preview');
 check(isset($gemini['gemini-3-flash-preview']), 'gemini exposes active Gemini 3 Flash preview');

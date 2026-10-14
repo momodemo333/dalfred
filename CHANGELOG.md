@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.34.0] - 2026-10-14
+
+The model lists in the AI configuration are up to date. A model you already
+chose stays selected after the update; the new ones are simply added.
+
+### Added
+- **Anthropic**: Claude Sonnet 5.5 (now the recommended one), Opus 5.5,
+  Fable 5.1, Haiku 5.5 and Opus 5.
+- **OpenAI**: GPT-6.1 Sol (recommended), GPT-6 Sol, Luna and Astra, plus
+  GPT-5.6 Luna and GPT-5.4 Nano.
+- **Mistral**: Mistral Large 4 (1M-token context). `mistral-large-latest`
+  still points to Large 3 on Mistral's side, so both are listed.
+- **Google**: Gemini 3.8 Flash (recommended), Gemini 4 Argon, Gemini 3.7 Flash,
+  3.6 Flash and 3.5 Flash-Lite.
+- GPT-6 models get image and PDF attachments, like GPT-5.
+
+Every listed model was checked against the provider's API on 2026-10-14, and
+the newest of each provider ran the full test conversation with tools.
+
+### Fixed
+- **Claude Opus 4.1 and every Claude model before 4.5 have been retired by
+  Anthropic**: an installation still set to one of them got an error on every
+  message. On update, such a setting moves to the closest model still served
+  (Opus → Opus 4.8, Sonnet → Sonnet 4.6, Haiku → Haiku 4.5), and the same goes
+  for `mistral-large-2411` and `pixtral-large-latest` (→ Mistral Large 3).
+  Older models that still work are left as they are.
+- The context gauge used 1M tokens for Claude Sonnet 4.5; it has 200K.
+
 ## [2.33.0] - 2026-10-06
 
 Concerns the external MCP access (OAuth connectors: claude.ai, ChatGPT,
