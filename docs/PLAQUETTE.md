@@ -165,7 +165,7 @@ L'intelligence artificielle ouvre un champ immense de possibilités. Chaque reto
 **Dalfred** est développé par **E-dem SRL**, société belge spécialisée dans le développement de modules Dolibarr et l'intégration d'ERP.
 
 - 🌐 **Site web** : [www.e-dem.com](https://www.e-dem.com)
-- 📧 **Contact** : morgan@e-dem.com
+- 📧 **Contact** : support@e-dem.com
 - 📞 **Téléphone** : +32 474 62 22 18
 - 🏪 **DoliStore** : [Fiche produit Dalfred](https://www.dolistore.com/product.php?id=2743&title=dalfred-assistant-ia-pour-dolibarr&l=fr)
 
