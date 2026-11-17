@@ -17,7 +17,7 @@ namespace Dalfred\Service;
 class DalfredMigrations
 {
     /** Current module version — must match modDalfred::$version */
-    public const MODULE_VERSION = '2.35.0';
+    public const MODULE_VERSION = '2.35.1';
 
     /**
      * Models that have been deprecated by their provider and must be remapped
@@ -76,6 +76,36 @@ class DalfredMigrations
      * @param \DoliDB $db Database handler
      * @return bool True when the model was changed
      */
+    /**
+     * Delete the files earlier packages shipped and this one must not leave
+     * behind (see ObsoleteFilesCleaner). Never fails the migration run: what
+     * could not be deleted is logged, kept in DALFRED_OBSOLETE_FILES_ERROR and
+     * shown on Setup > Diagnostic.
+     */
+    public static function removeObsoleteFiles(\DoliDB $db): bool
+    {
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+        global $conf;
+        $entity = (int) ($conf->entity ?? 1);
+
+        $result = ObsoleteFilesCleaner::forThisModule()->clean();
+        foreach ($result['removed'] as $rel) {
+            \dol_syslog('[Dalfred] Removed obsolete ' . $rel, LOG_NOTICE);
+        }
+        if ($result['failed'] !== []) {
+            $summary = [];
+            foreach ($result['failed'] as $rel => $why) {
+                $summary[] = $rel . ': ' . $why;
+            }
+            \dol_syslog('[Dalfred] WARNING obsolete files left: ' . implode('; ', $summary), LOG_WARNING);
+            \dolibarr_set_const($db, 'DALFRED_OBSOLETE_FILES_ERROR', substr(implode('; ', $summary), 0, 1000), 'chaine', 0, '', 0);
+        } elseif (\getDolGlobalString('DALFRED_OBSOLETE_FILES_ERROR') !== '') {
+            \dolibarr_del_const($db, 'DALFRED_OBSOLETE_FILES_ERROR', 0);
+        }
+
+        return $result['removed'] !== [];
+    }
+
     public static function remapDeprecatedModel(\DoliDB $db): bool
     {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
@@ -687,6 +717,12 @@ class DalfredMigrations
         // Mistral IDs added to DEPRECATED_MODEL_REMAP. Installations already
         // past 2.19.2 would never see the new entries otherwise.
         $helper->addCallbackMigration('2.34.0', [self::class, 'remapDeprecatedModel']);
+
+        // === v2.35.1: delete what an update by unzipping over 2.34.0 or older
+        // leaves behind, above all the unauthenticated standalone MCP server
+        // (dolibarr-mcp-server/public/). Also replayed by init() on every
+        // reactivation, so an install that lacked the rights can retry.
+        $helper->addCallbackMigration('2.35.1', [self::class, 'removeObsoleteFiles']);
 
         return $helper;
     }

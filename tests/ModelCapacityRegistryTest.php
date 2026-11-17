@@ -42,7 +42,8 @@ assertEq(1_050_000, ModelCapacityRegistry::get('gpt-6.1-sol'),       'gpt-6.1-so
 assertEq(1_000_000, ModelCapacityRegistry::get('claude-opus-5-5'),   'claude-opus-5-5 = 1M');
 assertEq(1_000_000, ModelCapacityRegistry::get('claude-haiku-5-5'),  'claude-haiku-5-5 = 1M');
 assertEq(1_048_576, ModelCapacityRegistry::get('mistral-large-4'),   'mistral-large-4 = 1M');
-assertEq(262_144, ModelCapacityRegistry::get('mistral-large-latest'), 'mistral-large-latest stays Large 3');
+assertEq(1_048_576, ModelCapacityRegistry::get('mistral-large-latest'), 'mistral-large-latest is Large 4 since 2026-11');
+assertEq(262_144, ModelCapacityRegistry::get('mistral-large-2512'), 'mistral-large-2512 (Large 3) keeps 256K');
 assertEq(1_000_000, ModelCapacityRegistry::get('gemini-4-argon'),    'gemini-4-argon = 1M');
 assertEq(1_050_000, ModelCapacityRegistry::get('gpt-5.6-terra'),     'gpt-5.6-terra = 1.05M');
 assertEq(1_000_000, ModelCapacityRegistry::get('claude-opus-4-8'),   'opus 4.8 = 1M');
@@ -71,7 +72,7 @@ assertEq(200_000, ModelCapacityRegistry::get('o4-mini'), 'o4-mini matches o4');
 echo "\n=== Mistral additions ===\n";
 assertEq(256_000, ModelCapacityRegistry::get('codestral-latest'),    'codestral-latest prefix match (Codestral 2 = 256k)');
 assertEq(128_000, ModelCapacityRegistry::get('open-mistral-nemo'),   'open-mistral-nemo exact');
-assertEq(262_144, ModelCapacityRegistry::get('mistral-large-latest'),'mistral-large-latest prefix match');
+assertEq(262_144, ModelCapacityRegistry::get('mistral-large-2411'),'mistral-large-* prefix match');
 assertEq(262_144, ModelCapacityRegistry::get('mistral-small-latest'),'mistral-small-latest prefix match');
 assertEq(262_144, ModelCapacityRegistry::get('ministral-14b-latest'),'ministral 14B latest');
 assertEq(262_144, ModelCapacityRegistry::get('ministral-8b-latest'),'ministral 8B latest');

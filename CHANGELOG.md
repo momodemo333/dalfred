@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.35.1] - 2026-11-17
+
+### Fixed
+- **Mistral Large 4 failed on every tool call.** Large 4 (and
+  `mistral-large-latest`, which Mistral moved from Large 3 to Large 4 in
+  November) reasons before answering and returns its content as a list of
+  blocks; NeuronAI 3.15 expected a string ("must be of type string, array
+  given") and, on a plain answer, read the wrong field. Dalfred now uses a
+  Mistral provider that keeps the text and drops the reasoning. Every model in
+  the Mistral list passed a tool-call round trip on 2026-11-17; the other
+  Mistral models were not affected.
+- **Updating by unzipping over an older version left the standalone MCP server
+  in place.** 2.35.0 stopped shipping `dolibarr-mcp-server/public/` (an
+  unauthenticated MCP server under the web root) and `bin/`, but unzipping
+  never deletes anything. The update now removes them (only those paths, only
+  inside the module folder, symbolic links never followed). If the web server
+  lacks the rights, Setup > Diagnostic says so and names the folders to delete;
+  reactivating the module retries.
+- Mistral list: `mistral-large-latest` was labelled "Large 3" and now points to
+  Large 4; `magistral-small-latest` now points to Mistral Small 4. Labels and
+  the context gauge (1M tokens for `mistral-large-latest`) follow. No model
+  removed, the recommended one is unchanged (Mistral Medium 3.5).
+
 ## [2.35.0] - 2026-11-17
 
 Dalfred no longer breaks, and no longer breaks other modules, when another

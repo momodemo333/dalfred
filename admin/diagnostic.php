@@ -157,6 +157,31 @@ if ($lastRuntimeError !== null) {
 }
 print '</td></tr>';
 
+// Files an earlier package shipped and an update by unzipping left behind
+// (Dalfred\Service\ObsoleteFilesCleaner, run by the 2.35.1 migration and on
+// every reactivation).
+$cleaner = \Dalfred\Service\ObsoleteFilesCleaner::forThisModule();
+print '<tr class="oddeven"><td>' . dol_escape_htmltag($langs->trans('DiagRowObsoleteFiles')) . '</td><td>';
+if ($cleaner->isDevelopmentCheckout()) {
+    print '<span class="opacitymedium">' . dol_escape_htmltag($langs->trans('DiagObsoleteDevCheckout')) . '</span>';
+} else {
+    $leftover = $cleaner->remaining();
+    if ($leftover === array()) {
+        print '<span class="badge badge-status4">' . dol_escape_htmltag($langs->trans('DiagObsoleteNone')) . '</span>';
+    } else {
+        print '<span class="badge badge-danger">' . dol_escape_htmltag($langs->trans('DiagObsoleteLeft')) . '</span><br>';
+        foreach ($leftover as $rel) {
+            print '&middot; <code>' . dol_escape_htmltag(dol_buildpath('/dalfred/' . $rel, 0)) . '</code><br>';
+        }
+        $lastError = getDolGlobalString('DALFRED_OBSOLETE_FILES_ERROR');
+        if ($lastError !== '') {
+            print '<span class="opacitymedium">' . dol_escape_htmltag($lastError) . '</span><br>';
+        }
+        print dol_escape_htmltag($langs->trans('DiagObsoleteHowTo'));
+    }
+}
+print '</td></tr>';
+
 print '</table><br>';
 
 // =============================================================================

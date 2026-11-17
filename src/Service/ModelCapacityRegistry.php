@@ -44,7 +44,9 @@ final class ModelCapacityRegistry
         'claude-opus-4'      => 200_000,
         'claude-3-5-sonnet'  => 200_000,
         'claude-3-5-haiku'   => 200_000,
-        // Mistral — values returned by GET /v1/models on 2026-10-14.
+        // Mistral — values returned by GET /v1/models on 2026-10-14;
+        // mistral-large-latest points to Large 4 since 2026-11 (checked 2026-11-17).
+        'mistral-large-latest' => 1_048_576,
         'mistral-large-4'    => 1_048_576,
         'mistral-large'      => 262_144,
         'mistral-medium'     => 262_144,

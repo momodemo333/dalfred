@@ -8,7 +8,7 @@ use NeuronAI\HttpClient\GuzzleHttpClient;
 use NeuronAI\Providers\AIProviderInterface;
 use NeuronAI\Providers\Anthropic\Anthropic;
 use NeuronAI\Providers\OpenAI\OpenAI;
-use NeuronAI\Providers\Mistral\Mistral;
+use Dalfred\Providers\DalfredMistral;
 use NeuronAI\Providers\Ollama\Ollama;
 use NeuronAI\Providers\Gemini\Gemini;
 
@@ -433,7 +433,8 @@ class ConfigService
                 if (empty($apiKey)) {
                     throw new \RuntimeException('Mistral API key not configured. Please set it in Dalfred AI configuration.');
                 }
-                return new Mistral(
+                // Tolerates the array content of reasoning models (Large 4).
+                return new DalfredMistral(
                     key: $apiKey,
                     model: $model,
                     parameters: ['tool_choice' => 'auto'],
@@ -541,21 +542,23 @@ class ConfigService
                     'gpt-4o' => 'GPT-4o',
                 ];
             case 'mistral':
-                // Source: Mistral Models API GET /v1/models (2026-10-14).
-                // Only chat-completion models with function calling and no
-                // deprecation timestamp are listed. Dated snapshots are omitted
-                // in favour of their maintained *-latest aliases, except
-                // Large 4, which has no -latest alias yet (mistral-large-latest
-                // still points to Large 3).
+                // Source: Mistral Models API GET /v1/models (2026-10-14,
+                // rechecked 2026-11-17). Only chat-completion models with
+                // function calling and no deprecation timestamp are listed.
+                // Dated snapshots are omitted in favour of their maintained
+                // *-latest aliases. Since November 2026 mistral-large-latest
+                // points to Large 4 (it was Large 3), and magistral-small-latest
+                // to Mistral Small 4. Every ID below passed a tool-call round
+                // trip on 2026-11-17 (Large 4 needs DalfredMistral).
                 return [
                     'mistral-medium-latest' => 'Mistral Medium 3.5 (Recommended)',
                     'mistral-large-4' => 'Mistral Large 4',
                     'mistral-small-latest' => 'Mistral Small 4 (Fast + Reasoning)',
-                    'mistral-large-latest' => 'Mistral Large 3',
+                    'mistral-large-latest' => 'Mistral Large (latest: Large 4)',
                     'ministral-14b-latest' => 'Ministral 3 14B',
                     'ministral-8b-latest' => 'Ministral 3 8B',
                     'ministral-3b-latest' => 'Ministral 3 3B (Fastest)',
-                    'magistral-small-latest' => 'Magistral Small (Reasoning)',
+                    'magistral-small-latest' => 'Magistral Small (now Mistral Small 4)',
                     'codestral-latest' => 'Codestral (Code)',
                 ];
             case 'gemini':
