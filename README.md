@@ -17,7 +17,7 @@ It adds a chat-based interface backed by NeuronAI v3 and tool access to Dolibarr
 
 ## Requirements
 
-- Dolibarr 17 or later (external MCP access calls `dolEncrypt()`, which does not exist in Dolibarr 16)
+- Dolibarr 17 or later
 - PHP 8.1 or later, with the `curl`, `json`, `mbstring` and `openssl` extensions
 - Dolibarr **API REST** module enabled (each user of Dalfred needs a Dolibarr API key)
 - An API key for the AI provider you enable, or a self-hosted Ollama server

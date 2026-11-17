@@ -121,6 +121,7 @@ class modDalfred extends DolibarrModules
 
         // Prerequisites
         $this->phpmin = array(8, 1);
+        $this->need_dolibarr_version = array(17, 0);
 
         // Warnings
         $this->warnings_activation = array();

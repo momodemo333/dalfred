@@ -116,7 +116,7 @@ Chaque utilisateur configure sa propre clé API, pour un contrôle total des co�
 
 | | |
 |---|---|
-| **Dolibarr** | Version 18.0 et supérieures |
+| **Dolibarr** | Version 17.0 et supérieures |
 | **PHP** | 8.1+ |
 | **Base de données** | MySQL / MariaDB |
 | **Hébergement** | Tout serveur compatible Dolibarr |

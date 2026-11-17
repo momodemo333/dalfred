@@ -4,7 +4,7 @@ Ce guide résume l'installation et la mise en route de Dalfred (version 2.35.1).
 
 ## Pré-requis
 
-- Dolibarr 17 ou supérieur (l'accès MCP externe appelle `dolEncrypt()`, qui n'existe pas dans Dolibarr 16)
+- Dolibarr 17 ou supérieur
 - PHP 8.1 ou supérieur, avec les extensions `curl`, `json`, `mbstring` et `openssl`
 - Module **API REST** activé dans Dolibarr (Accueil > Configuration > Modules > API REST)
 - Une clé API d'un fournisseur IA (Anthropic, OpenAI, Mistral, Google Gemini) ou un serveur Ollama auto-hébergé
