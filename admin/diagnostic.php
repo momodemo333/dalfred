@@ -126,6 +126,37 @@ if (!empty($snapshot['panel']) && $snapshot['panel']['detected']) {
 }
 print '</td></tr>';
 
+// Dependency isolation: are the bundled libraries prefixed (released package),
+// is a key type of the MCP runtime already defined by someone else, and what
+// stopped the runtime last. See lib/dalfred_runtime.php.
+dol_include_once('/dalfred/lib/dalfred_runtime.php');
+$runtimeDir = dol_buildpath('/dalfred/dolibarr-mcp-server', 0);
+$moduleDir = dol_buildpath('/dalfred', 0);
+print '<tr class="oddeven"><td>' . dol_escape_htmltag($langs->trans('DiagRowIsolation')) . '</td><td>';
+foreach (array('DiagIsolationModule' => $moduleDir, 'DiagIsolationRuntime' => $runtimeDir) as $labelKey => $dir) {
+    $prefix = dalfred_runtime_prefix($dir);
+    print dol_escape_htmltag($langs->trans($labelKey)) . ' : ';
+    if ($prefix !== '') {
+        print '<span class="badge badge-status4">' . dol_escape_htmltag($prefix) . '\\</span>';
+    } else {
+        print '<span class="badge badge-warning">' . dol_escape_htmltag($langs->trans('DiagIsolationNone')) . '</span>';
+    }
+    print '<br>';
+}
+foreach (dalfred_runtime_conflicts($runtimeDir, false) as $conflict) {
+    print '<span class="badge badge-danger">' . dol_escape_htmltag($langs->trans('DiagIsolationConflict')) . '</span> '
+        . dol_escape_htmltag(dalfred_runtime_conflict_message($conflict)) . '<br>';
+}
+$lastRuntimeError = dalfred_runtime_last_error();
+if ($lastRuntimeError !== null) {
+    print '<span class="opacitymedium">' . dol_escape_htmltag($langs->trans('DiagIsolationLastError')) . ' ('
+        . dol_print_date((int) $lastRuntimeError['date'], 'dayhour') . ') : '
+        . dol_escape_htmltag((string) $lastRuntimeError['message'])
+        . ($lastRuntimeError['file'] !== '' ? ' — ' . dol_escape_htmltag($lastRuntimeError['file'] . ':' . (int) $lastRuntimeError['line']) : '')
+        . '</span>';
+}
+print '</td></tr>';
+
 print '</table><br>';
 
 // =============================================================================

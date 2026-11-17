@@ -150,7 +150,24 @@ $autoload = \DolibarrMcpOAuth\Support\PackageLocator::findAutoloader(array(
 if (!$autoload) {
 	dalfred_error(500, -32002, 'Dolibarr MCP server package not found');
 }
-require_once $autoload;
+
+// Shared-library collisions: refuse with the culprit's name instead of dying
+// on a fatal error. See lib/dalfred_runtime.php.
+dol_include_once('/dalfred/lib/dalfred_runtime.php');
+$runtimeDir = dalfred_runtime_package_dir($autoload);
+$conflicts = dalfred_runtime_conflicts($runtimeDir, false);
+dalfred_runtime_arm_fatal_handler();
+if (empty($conflicts)) {
+	require_once $autoload;
+	$conflicts = dalfred_runtime_conflicts($runtimeDir, true);
+}
+if (!empty($conflicts)) {
+	$conflictMessage = dalfred_runtime_conflict_message($conflicts[0]);
+	dol_syslog('[DALFRED] '.$conflictMessage, LOG_ERR);
+	dalfred_runtime_record_error($conflictMessage, $conflicts[0]['file']);
+	dalfred_runtime_disarm();
+	dalfred_error(500, -32002, $conflictMessage);
+}
 
 /**
  * Build the read-only SQL capability, or null when the caller may not use it.
@@ -301,8 +318,12 @@ try {
 	dol_include_once('/dalfred/lib/dalfred.lib.php');
 	$environment = dalfred_mcp_environment($sqlCapability !== null);
 
-	$request = \GuzzleHttp\Psr7\ServerRequest::fromGlobals()
-		->withBody(\GuzzleHttp\Psr7\Utils::streamFor($rawBody));
+	// The runtime's dependencies are prefixed in the released package and not
+	// in a development checkout: name them through the helper.
+	$serverRequestClass = dalfred_runtime_class($runtimeDir, 'GuzzleHttp\Psr7\ServerRequest');
+	$utilsClass = dalfred_runtime_class($runtimeDir, 'GuzzleHttp\Psr7\Utils');
+	$request = $serverRequestClass::fromGlobals()
+		->withBody($utilsClass::streamFor($rawBody));
 
 	$response = DolibarrMcp\Bootstrap::handleHttpRequest($request, $sessionDir, $config, $sqlCapability, $environment);
 
@@ -330,8 +351,11 @@ try {
 		);
 	}
 
+	dalfred_runtime_disarm();
 	DolibarrMcp\Bootstrap::emit($response);
 } catch (Throwable $e) {
+	dalfred_runtime_disarm();
+	dalfred_runtime_record_error(get_class($e).': '.$e->getMessage(), $e->getFile(), $e->getLine());
 	if ($audit !== null && $mcpUserId > 0) {
 		$audit->record(
 			$mcpUserId,

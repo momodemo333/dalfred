@@ -1,5 +1,55 @@
 # Changelog
 
+## [2.35.0] - 2026-11-17
+
+Dalfred no longer breaks, and no longer breaks other modules, when another
+module or the Dolibarr core loads its own copy of a shared library.
+
+### Fixed
+- **MCP endpoint: HTTP 500 on `tools/list` and tool calls when another copy of
+  psr/log 1.x was already loaded.** Dolibarr runs every module in one PHP
+  process, and the core itself ships psr/log 1.x (`includes/Psr/Log`). Once
+  that interface was loaded, the runtime's psr/log 3 classes could not
+  implement it: "Declaration of Psr\Log\AbstractLogger::emergency(...) must be
+  compatible with ...". Reproduced on 2.34.0, the same failure emMCP met in
+  production on 2026-11-11.
+- **Chat: another module's guzzle could take the place of Dalfred's.** NeuronAI
+  would then send every provider request through a foreign, possibly
+  incompatible copy. Conversely, Dalfred's autoloader, loaded on every page by
+  its hooks, answered for other modules' guzzle and psr/http-* classes.
+- An OAuth client left idle for about a month could no longer sign in
+  (dolibarr-mcp-oauth 1.2.0, already in emMCP 1.9.0). Token refusals now name
+  their precise reason ("already used", "unknown client_id").
+
+### Changed
+- **Isolated dependencies.** The release package prefixes every third-party
+  namespace with php-scoper: the module's own tree (NeuronAI, guzzle, psr/http-*,
+  pdfparser) under `DalfredVendor\`, the MCP runtime's (mcp/sdk dependencies,
+  psr/log, guzzle, symfony...) under `DalfredMcpVendor\`. `Dalfred\`,
+  `DolibarrMcp\` and `Mcp\` stay as they are, so modules that extend the MCP
+  runtime are unaffected. Both trees use an authoritative classmap. The build
+  proves it each time: it reproduces both failures on the unprefixed package,
+  then runs a user message, a provider call, the chat's MCP tools and an MCP
+  `initialize` + `tools/list` next to foreign psr/log 1.x, psr/http-message 1.0,
+  guzzle and NeuronAI copies.
+- **Readable refusal instead of a fatal error.** Before the MCP runtime is used
+  (external endpoint and chat), its key types are checked to come from its own
+  directory; a type defined elsewhere is reported with the file that defined
+  it. A fatal error that still happens is recorded.
+- **Setup > Diagnostic** shows whether the libraries are isolated, any conflict
+  detected, and the last runtime failure.
+
+### Security
+- The package no longer ships `dolibarr-mcp-server/public/` and `bin/`. The
+  module never used them, but `public/index.php` sat under the web root: a
+  standalone MCP server answering without authentication and taking the
+  Dolibarr URL to call from a request header. Customers updating by unzipping
+  over an existing install should delete `custom/dalfred/dolibarr-mcp-server/public/`.
+
+### Build
+- The runtime and the three bundled libraries must be clean checkouts at their
+  pinned tags (runtime 2.7.0, oauth 1.2.0, sql 1.1.1, audit 1.1.0), as in emMCP.
+
 ## [2.34.0] - 2026-10-14
 
 The model lists in the AI configuration are up to date. A model you already

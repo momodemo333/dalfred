@@ -61,7 +61,6 @@ use Dalfred\Service\CommandResolver;
 use Dalfred\Service\ConfigService;
 use Dalfred\Service\FileAttachmentService;
 use Dalfred\Service\ThreadService;
-use NeuronAI\Chat\Messages\UserMessage;
 
 // Initialize response array
 $response = [
@@ -300,14 +299,7 @@ try {
 
         try {
             // Build UserMessage — with ContentBlocks when files were attached, plain string otherwise
-            if ($ingestedFiles !== []) {
-                if ($attachSvc === null) {
-                    $attachSvc = new FileAttachmentService();
-                }
-                $userMessage = new UserMessage($attachSvc->buildContentBlocks($ingestedFiles, $message, $provider, $model));
-            } else {
-                $userMessage = new UserMessage($message);
-            }
+            $userMessage = ($attachSvc ?? new FileAttachmentService())->buildUserMessage($ingestedFiles, $message, (string) ($provider ?? ''), (string) ($model ?? ''));
 
             // Send message and get response
             $llmResponse = $agent->chat($userMessage)->getMessage();
@@ -337,14 +329,7 @@ try {
         dol_syslog('[Dalfred] Sync mode (fallback) for thread=' . $threadId, LOG_INFO);
 
         // Build UserMessage — with ContentBlocks when files were attached, plain string otherwise
-        if ($ingestedFiles !== []) {
-            if ($attachSvc === null) {
-                $attachSvc = new FileAttachmentService();
-            }
-            $userMessage = new UserMessage($attachSvc->buildContentBlocks($ingestedFiles, $message, $provider, $model));
-        } else {
-            $userMessage = new UserMessage($message);
-        }
+        $userMessage = ($attachSvc ?? new FileAttachmentService())->buildUserMessage($ingestedFiles, $message, (string) ($provider ?? ''), (string) ($model ?? ''));
 
         // Send message and get response
         $llmResponse = $agent->chat($userMessage)->getMessage();

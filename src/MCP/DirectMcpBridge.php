@@ -40,7 +40,19 @@ class DirectMcpBridge
         // Load the MCP server autoloader
         $mcpAutoloader = $this->findMcpAutoloader();
         if ($mcpAutoloader && !class_exists(Bootstrap::class, false)) {
+            // Another module's copy of a key type would turn the first tool
+            // into a PHP fatal error; refuse with its name instead, which the
+            // chat reports like any other error (lib/dalfred_runtime.php).
+            $guard = dirname(__DIR__, 2) . '/lib/dalfred_runtime.php';
+            $guarded = \defined('DOL_DOCUMENT_ROOT') && \is_file($guard);
+            if ($guarded) {
+                require_once $guard;
+                $this->refuseOnConflict(\dalfred_runtime_conflicts(\dalfred_runtime_package_dir($mcpAutoloader), false));
+            }
             require_once $mcpAutoloader;
+            if ($guarded) {
+                $this->refuseOnConflict(\dalfred_runtime_conflicts(\dalfred_runtime_package_dir($mcpAutoloader), true));
+            }
         }
 
         // Build a request-scoped container with explicit credentials. Avoid using
@@ -48,6 +60,22 @@ class DirectMcpBridge
         // several users/entities over their lifetime, and explicit config is safer
         // for multicompany installations.
         $this->container = Bootstrap::createContainer(new ConnectionConfig($dolibarrUrl, $apiKey));
+    }
+
+    /**
+     * @param array<int, array{type: string, file: string}> $conflicts
+     */
+    private function refuseOnConflict(array $conflicts): void
+    {
+        if ($conflicts === []) {
+            return;
+        }
+        $message = \dalfred_runtime_conflict_message($conflicts[0]);
+        \dalfred_runtime_record_error($message, $conflicts[0]['file']);
+        if (\function_exists('dol_syslog')) {
+            \dol_syslog('[DALFRED] ERROR ' . $message, LOG_ERR);
+        }
+        throw new \RuntimeException($message);
     }
 
     /**

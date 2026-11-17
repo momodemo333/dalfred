@@ -72,7 +72,13 @@ dolibarr-mcp-server/
 # Local dev assets restored from backup (never for the public repo)
 /CLAUDE.md
 /dev/
-/tools/
+/tools/*
+# Build tooling for the dependency isolation (2.35.0): public, needed to
+# reproduce the release package.
+!/tools/scoper.inc.php
+!/tools/isolate-dependencies.sh
+!/tools/rehash-autoload-files.php
+!/tools/normalize-vendor.php
 /scripts/
 /marketing/
 /.superpowers/
@@ -80,3 +86,4 @@ dolibarr-mcp-server/
 /.emgateway.conf
 /.gitlab-ci.yml
 /Makefile.local
+__pycache__/

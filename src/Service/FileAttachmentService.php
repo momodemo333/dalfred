@@ -7,6 +7,7 @@ namespace Dalfred\Service;
 use Dalfred\Chat\ContentBlocks\AttachmentMetaContent;
 use NeuronAI\Chat\Messages\ContentBlocks\ContentBlockInterface;
 use NeuronAI\Chat\Messages\ContentBlocks\TextContent;
+use NeuronAI\Chat\Messages\UserMessage;
 use RuntimeException;
 
 use function array_merge;
@@ -172,6 +173,26 @@ final class FileAttachmentService
             mimeType: $detectedMime,
             sizeBytes: filesize($absolute) ?: 0,
         );
+    }
+
+    /**
+     * The user's turn as a NeuronAI message: content blocks when files were
+     * attached, the plain text otherwise.
+     *
+     * Built here rather than in the PHP pages because the release package
+     * prefixes NeuronAI's namespace (tools/scoper.inc.php): code under src/ is
+     * rewritten to the prefixed name at build time, a page naming
+     * NeuronAI\Chat\Messages\UserMessage itself would not be.
+     *
+     * @param IngestedFile[] $ingested
+     */
+    public function buildUserMessage(array $ingested, string $messageText, string $provider = '', string $model = ''): UserMessage
+    {
+        if ($ingested === []) {
+            return new UserMessage($messageText);
+        }
+
+        return new UserMessage($this->buildContentBlocks($ingested, $messageText, $provider, $model));
     }
 
     /**
